@@ -1,0 +1,8 @@
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# Reserved if Eleventy ever lands (V2):
+node_modules/
+_site/

@@ -1,0 +1,51 @@
+/* ChatPrep — styles.css
+ * Vanilla CSS, custom-properties-based, mobile-first.
+ * Real styles land in Day 5 of the build (per SPEC.md).
+ * For now: minimal placeholder styling. */
+
+:root {
+  --bg: #ffffff;
+  --text: #0b0c0c;
+  --accent: #1d70b8;
+  --accent-text: #ffffff;
+  --muted: #505a5f;
+  --border: #b1b4b6;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0b0c0c;
+    --text: #f3f2f1;
+    --accent: #5694ca;
+    --accent-text: #000000;
+    --muted: #b1b4b6;
+    --border: #505a5f;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+main {
+  max-width: 38rem;
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
+}
+
+h1 {
+  font-size: 2rem;
+  margin: 0 0 1rem;
+}
+
+p {
+  margin: 0 0 1rem;
+  color: var(--muted);
+}
