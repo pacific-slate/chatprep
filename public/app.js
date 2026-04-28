@@ -491,10 +491,11 @@ function deriveCanonical() {
   // Map ISO country code → English name for the template
   const countryName = countryNameFromCode(state.country) || "an unspecified country";
 
-  const goalsLine    = t.goals_by_q1[state.goal] || "Help me think more clearly.";
-  const toneCfg      = t.tone_by_comfort[state.comfort] || t.tone_by_comfort.casual;
-  const formatLine   = t.format_by_q1[state.goal] || "Mix prose with bullets where helpful.";
-  const lengthLine   = t.length_by_detail[state.detail] || t.length_by_detail.standard;
+  const goalsLine     = t.goals_by_q1[state.goal] || "Help me think more clearly.";
+  const roleObjective = (t.role_objective_by_q1 || {})[state.goal] || "their goals";
+  const toneCfg       = t.tone_by_comfort[state.comfort] || t.tone_by_comfort.casual;
+  const formatLine    = t.format_by_q1[state.goal] || "Mix prose with bullets where helpful.";
+  const lengthLine    = t.length_by_detail[state.detail] || t.length_by_detail.standard;
 
   const aboutMe = fmt(t.skeleton.about_me, { role, industry, country: countryName });
 
@@ -513,19 +514,20 @@ function deriveCanonical() {
 
   return {
     aboutMe,
-    hobbies:      state.hobbies.trim(),
-    goalsLead:    t.skeleton.goals_lead,
+    hobbies:       state.hobbies.trim(),
+    goalsLead:     t.skeleton.goals_lead,
     goalsLine,
-    toneLead:     t.skeleton.tone_lead,
-    tone:         toneCfg.tone,
-    readingLevel: toneCfg.reading_level,
-    format:       formatLine,
-    length:       lengthLine,
-    alwaysLead:   t.skeleton.always_lead,
-    always:       alwaysList,
-    avoidLead:    t.skeleton.avoid_lead,
-    avoid:        avoidList,
-    fallback:     t.skeleton.fallback,
+    roleObjective,
+    toneLead:      t.skeleton.tone_lead,
+    tone:          toneCfg.tone,
+    readingLevel:  toneCfg.reading_level,
+    format:        formatLine,
+    length:        lengthLine,
+    alwaysLead:    t.skeleton.always_lead,
+    always:        alwaysList,
+    avoidLead:     t.skeleton.avoid_lead,
+    avoid:         avoidList,
+    fallback:      t.skeleton.fallback,
   };
 }
 
@@ -535,28 +537,39 @@ function countryNameFromCode(code) {
   return found ? found.name : null;
 }
 
+/* Per-service adapters
+ * Each adapter follows the vendor's officially documented prompt structure.
+ * Sources cited in docs/VENDOR_SOURCES.md — re-verify quarterly.
+ */
+
 function adaptForChatGPT(c) {
+  // Source: OpenAI GPT-4.1 Prompting Guide (openai-cookbook/examples/gpt4-1_prompting_guide.ipynb)
+  // Recommended structure: markdown headers — # Role and Objective, # Instructions, # Output Format
+  // Custom Instructions UI splits into two boxes; we map the structure across.
+
   const box1 = [
+    "# About me",
     c.aboutMe,
     c.hobbies ? `My hobbies and interests: ${c.hobbies}.` : null,
     "",
-    c.goalsLead,
-    `- ${c.goalsLine}`,
+    "# What I want help with",
+    c.goalsLine,
   ].filter(Boolean).join("\n");
 
   const box2 = [
-    c.toneLead,
+    "# How to respond",
     `- Tone: ${c.tone}.`,
     `- Reading level: ${c.readingLevel}`,
     `- Format: ${c.format}`,
     `- Length: ${c.length}`,
     "",
-    c.alwaysLead,
-    ...(c.always.length ? c.always.map(x => `- ${x}`) : ["- (no specific rules — use your best judgment)"]),
+    "# Always",
+    ...(c.always.length ? c.always.map(x => `- ${x}`) : ["- Use your best judgment."]),
     "",
-    c.avoidLead,
+    "# Avoid",
     ...c.avoid.map(x => `- ${x}`),
     "",
+    "# When unsure",
     c.fallback,
   ].join("\n");
 
@@ -564,45 +577,84 @@ function adaptForChatGPT(c) {
 }
 
 function adaptForClaude(c) {
+  // Source: Anthropic Prompting Best Practices (platform.claude.com/docs/...)
+  // - "Structure prompts with XML tags" — descriptive names, consistent
+  // - "Give Claude a role" — single sentence in system prompt focuses behavior
+  // - We add an explicit <role> tag at the top per their guidance.
+
   const aboutSection = c.aboutMe + (c.hobbies ? `\nMy hobbies: ${c.hobbies}.` : "");
   return [
-    "<about-me>", aboutSection, "</about-me>", "",
-    "<goals>", c.goalsLine, "</goals>", "",
-    "<tone-and-format>",
+    "<role>",
+    `You are a thoughtful assistant helping with ${c.roleObjective}. Use a ${c.tone} tone.`,
+    "</role>",
+    "",
+    "<about-me>",
+    aboutSection,
+    "</about-me>",
+    "",
+    "<how-to-respond>",
     `Tone: ${c.tone}.`,
     `Reading level: ${c.readingLevel}`,
     `Format: ${c.format}`,
     `Length: ${c.length}`,
-    "</tone-and-format>", "",
+    "</how-to-respond>",
+    "",
     "<always>",
     ...(c.always.length ? c.always.map(x => `- ${x}`) : ["- Use your best judgment."]),
-    "</always>", "",
-    "<avoid>", ...c.avoid.map(x => `- ${x}`), "</avoid>", "",
-    "<fallback>", c.fallback, "</fallback>",
+    "</always>",
+    "",
+    "<avoid>",
+    ...c.avoid.map(x => `- ${x}`),
+    "</avoid>",
+    "",
+    "<when-unsure>",
+    c.fallback,
+    "</when-unsure>",
   ].join("\n");
 }
 
 function adaptForGemini(c) {
-  const full = [
-    c.aboutMe,
-    c.hobbies ? `Hobbies: ${c.hobbies}.` : null,
+  // Source: Google Gemini 3 prompt design guide (ai.google.dev/gemini-api/docs/prompting-strategies)
+  // Recommended XML tags: <role>, <constraints>, <context>, <task>
+  // We follow their schema literally.
+
+  const aboutSection = c.aboutMe + (c.hobbies ? `\nHobbies: ${c.hobbies}.` : "");
+
+  const constraintsList = [
+    `Tone: ${c.tone}.`,
+    `Reading level: ${c.readingLevel}`,
+    `Format: ${c.format}`,
+    `Length: ${c.length}`,
     "",
-    `${c.goalsLead} ${c.goalsLine}`,
-    "",
-    `Tone: ${c.tone}. Reading level: ${c.readingLevel} Format: ${c.format} Length: ${c.length}`,
-    "",
-    c.alwaysLead,
+    "Always:",
     ...(c.always.length ? c.always.map(x => `- ${x}`) : ["- Use your best judgment."]),
     "",
-    c.avoidLead,
+    "Avoid:",
     ...c.avoid.map(x => `- ${x}`),
+  ].join("\n");
+
+  const full = [
+    "<role>",
+    `You are a thoughtful assistant helping with ${c.roleObjective}. Use a ${c.tone} tone.`,
+    "</role>",
     "",
-    c.fallback,
-  ].filter(Boolean).join("\n");
+    "<context>",
+    aboutSection,
+    "</context>",
+    "",
+    "<constraints>",
+    constraintsList,
+    "</constraints>",
+    "",
+    "<task>",
+    `Respond to my messages following the role and constraints above. ${c.fallback}`,
+    "</task>",
+  ].join("\n");
 
   const limit = services.gemini.char_limit || 4000;
   if (full.length <= limit) return { text: full, trimmed: false };
 
+  // Trim optional sections to fit the 4000-char hard cap
   let txt = full;
   txt = txt.replace(/Hobbies:.*\n/g, "");
   if (txt.length > limit) txt = txt.replace(c.fallback, "").trimEnd();
@@ -766,7 +818,12 @@ async function copyText(text, btn, sourceTextarea) {
 /* ===================== fetch + fatal fallback ===================== */
 
 function fetchJSON(path) {
-  return fetch(path).then(r => {
+  // cache: 'no-store' so local dev iteration always sees fresh data files.
+  // Production: CF Workers send `cache-control: must-revalidate` which the
+  // browser respects regardless, so this changes nothing in prod — it just
+  // unblocks dev when iterating on copy.json / templates.json without
+  // having to clear browser cache between reloads.
+  return fetch(path, { cache: "no-store" }).then(r => {
     if (!r.ok) throw new Error(`Failed to load ${path}`);
     return r.json();
   });

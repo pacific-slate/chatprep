@@ -1,6 +1,6 @@
 {
-  "_comment": "Template generation data. Canonical skeleton + per-input derivation rules + per-service adapters. Logic in app.js stays minimal — most tuning happens by editing this file.",
-  "_version": "0.0.2",
+  "_comment": "Template generation data. Canonical skeleton + per-input derivation rules + per-service adapters. Logic in app.js stays minimal — most tuning happens by editing this file. Per-vendor structure (markdown headers for ChatGPT, XML tags for Claude + Gemini) is grounded in each vendor's official prompt-engineering docs — see docs/VENDOR_SOURCES.md.",
+  "_version": "0.2.0",
   "_last_verified": "2026-04-27",
 
   "skeleton": {
@@ -19,6 +19,15 @@
     "coding":   "Help me write, debug, and understand code. Show worked examples.",
     "daily":    "Help me with everyday life — recipes, errands, planning, household decisions.",
     "creative": "Help me brainstorm and create. Riff with me; don't over-correct my voice."
+  },
+
+  "role_objective_by_q1": {
+    "writing":  "writing tasks",
+    "learning": "learning and understanding new things",
+    "work":     "professional tasks like emails, meetings, and planning",
+    "coding":   "writing, debugging, and learning code",
+    "daily":    "everyday life — recipes, errands, household decisions",
+    "creative": "creative work — brainstorming, writing, and ideas"
   },
 
   "tone_by_comfort": {
