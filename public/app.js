@@ -24,9 +24,17 @@
 "use strict";
 
 const STORAGE_KEY = "chatprep.draft.v2";
+const PREVIEW_OPEN_KEY = "chatprep.preview_open";
 const STORAGE_TTL_DAYS = 30;
-const SCREENS = ["intro", "step1", "step2", "step3", "step4", "output"];
-const ORDER   = ["intro", "step1", "step2", "step3", "step4", "output"];
+// step1 is now embedded in the intro screen (the topic-tile homepage).
+// We keep step IDs intro / step2 / step3 / step4 to avoid breaking deep links.
+const SCREENS = ["intro", "step2", "step3", "step4", "output"];
+const ORDER   = ["intro", "step2", "step3", "step4", "output"];
+
+// Screens where the live preview pane should be visible (anywhere in the
+// wizard except the homepage-with-no-pick-yet and the final output screen,
+// which has its own copy buttons).
+const PREVIEW_SCREENS = new Set(["intro", "step2", "step3", "step4"]);
 
 let copy, services, templates, industries, countries;
 let state = freshState();
@@ -54,7 +62,7 @@ async function bootstrap() {
   ]);
 
   hydrateCopy(document.body);
-  renderStep1Tiles();
+  renderStep1Tiles();              // tiles render into the intro section
   renderStep2Tiles();
   renderStep3Country();
   renderStep3DetailTiles();
@@ -63,18 +71,24 @@ async function bootstrap() {
   wireActions();
   wireFieldInputs();
   wireTabs();
+  wirePreviewTabs();
+  wirePreviewToggle();
+  wireHistory();
 
   const draft = loadDraft();
   if (draft) {
     state = { ...freshState(), ...draft };
-    document.querySelector('[data-action="resume"]')?.removeAttribute("hidden");
+    const banner = document.getElementById("resume-banner");
+    if (banner && state.goal) banner.hidden = false;
   } else {
     // Pre-fill country from browser locale if no saved draft
     const detected = detectCountryCode();
     if (detected) state.country = detected;
   }
 
-  goto("intro");
+  // Initial route: respect URL hash if present, else start at intro
+  const initialScreen = screenFromHash() || "intro";
+  goto(initialScreen, { replace: true });
 }
 
 /* ===================== i18n + locale helpers ===================== */
@@ -185,6 +199,9 @@ function hydrateCopy(root) {
 /* ===================== dynamic renders ===================== */
 
 function renderStep1Tiles() {
+  // Now lives on the homepage (intro screen). Tile click both records the
+  // answer AND advances to step2 — see ACTIONS handling for the goal field
+  // when the fieldset has data-advance-on-pick="true".
   const fs = document.querySelector('[data-field="goal"]');
   fs.appendChild(buildTiles(copy.step1.options, "goal", "radio"));
 }
@@ -334,23 +351,46 @@ function wireActions() {
 }
 
 const ACTIONS = {
-  start:    () => { state = freshState(); clearDraft(); const d = detectCountryCode(); if (d) state.country = d; goto("step1"); },
-  resume:   () => { goto(currentStepFromState() || "step1"); },
+  resume:   () => {
+    document.getElementById("resume-banner")?.setAttribute("hidden", "");
+    goto(currentStepFromState() || "step2");
+  },
+  "resume-dismiss": () => { document.getElementById("resume-banner")?.setAttribute("hidden", ""); },
   back:     () => goBack(),
   continue: () => goNext(),
   finish:   () => goNext(true),
-  restart:  () => { state = freshState(); clearDraft(); const d = detectCountryCode(); if (d) state.country = d; goto("intro"); window.scrollTo(0, 0); },
+  restart:  () => {
+    state = freshState();
+    clearDraft();
+    const d = detectCountryCode();
+    if (d) state.country = d;
+    goto("intro");
+    window.scrollTo(0, 0);
+  },
 };
 
 function wireFieldInputs() {
   document.body.addEventListener("change", e => {
     const t = e.target;
-    if (t.matches('input[name="goal"]'))     state.goal = t.value;
+    let advanceFromGoal = false;
+    if (t.matches('input[name="goal"]')) {
+      state.goal = t.value;
+      // When the goal radio lives in a tile-group with data-advance-on-pick,
+      // selecting it auto-advances. The intro screen sets this attribute
+      // so picking a topic on the homepage = pick + advance in one click.
+      const fs = t.closest('[data-advance-on-pick]');
+      if (fs && currentScreen() === "intro") advanceFromGoal = true;
+    }
     if (t.matches('input[name="comfort"]'))  state.comfort = t.value;
     if (t.matches('input[name="detail"]'))   state.detail = t.value;
     if (t.matches('input[name="avoid"]'))    state.avoid = collectChecked("avoid");
     if (t.matches('select[data-field="country"]')) state.country = t.value;
     saveDraft();
+    renderPreview();
+    if (advanceFromGoal) {
+      // Brief delay so the user sees their tile select before the screen swaps
+      setTimeout(() => goto("step2"), 180);
+    }
   });
   document.body.addEventListener("input", e => {
     const t = e.target;
@@ -359,6 +399,7 @@ function wireFieldInputs() {
     if (["industry","role","hobbies","avoid_other"].includes(f)) {
       state[f] = t.value;
       saveDraft();
+      renderPreview();
     }
   });
 }
@@ -369,12 +410,28 @@ function collectChecked(name) {
 
 /* ===================== navigation / validation ===================== */
 
-function goto(screen) {
+/* History-aware navigation.
+ *
+ * Each screen change pushes a hash entry (`#step2`, `#output`, etc.) so the
+ * browser back/forward buttons work as expected — back from #step3 goes to
+ * #step2, back from the homepage exits the site (correct), forward re-enters.
+ * Refresh keeps the user on the same step.
+ *
+ * popstate handler reads the new hash and re-routes via goto(..., {fromPopstate: true})
+ * to avoid pushing a duplicate history entry.
+ */
+function goto(screen, opts = {}) {
+  const { fromPopstate = false, replace = false } = opts;
+
   SCREENS.forEach(s => {
     const el = document.getElementById(`screen-${s}`);
     if (el) el.hidden = (s !== screen);
   });
+
   reflectStateIntoControls();
+  updatePreviewVisibility(screen);
+  renderPreview();
+
   const heading = document.querySelector(`#screen-${screen} .screen__heading`);
   if (heading) {
     heading.setAttribute("tabindex", "-1");
@@ -382,6 +439,29 @@ function goto(screen) {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
   if (screen === "output") renderOutputs();
+
+  // Sync URL hash unless this navigation came from popstate (else infinite loop)
+  if (!fromPopstate) {
+    const url = "#" + screen;
+    if (replace) history.replaceState({ screen }, "", url);
+    else         history.pushState({ screen }, "", url);
+  }
+}
+
+function wireHistory() {
+  window.addEventListener("popstate", e => {
+    const screen = e.state?.screen || screenFromHash() || "intro";
+    if (SCREENS.includes(screen)) goto(screen, { fromPopstate: true });
+  });
+}
+
+function screenFromHash() {
+  const hash = (location.hash || "").replace(/^#/, "");
+  if (!hash) return null;
+  if (!SCREENS.includes(hash)) return null;
+  // Don't deep-link to output if state is empty — redirect to intro
+  if (hash === "output" && !state.goal) return "intro";
+  return hash;
 }
 
 function currentScreen() {
@@ -389,7 +469,7 @@ function currentScreen() {
 }
 
 function currentStepFromState() {
-  if (!state.goal) return "step1";
+  if (!state.goal) return "intro";
   if (!state.comfort) return "step2";
   if (!state.country && !state.industry && !state.role) return "step3";
   return "step4";
@@ -717,21 +797,94 @@ function renderOutputs() {
   fillPanel("gemini",  buildSinglePanel("gemini", gemini.text, { trimmed: gemini.trimmed }));
 }
 
+/* ===================== live preview pane ===================== */
+
+function updatePreviewVisibility(screen) {
+  const pane = document.getElementById("preview-pane");
+  const layout = document.querySelector(".layout");
+  if (!pane || !layout) return;
+  const shouldShow = PREVIEW_SCREENS.has(screen);
+  pane.hidden = !shouldShow;
+  layout.classList.toggle("layout--with-preview", shouldShow);
+}
+
+function renderPreview() {
+  const pane = document.getElementById("preview-pane");
+  if (!pane || pane.hidden) return;
+
+  const placeholder = document.getElementById("preview-placeholder");
+  const content     = document.getElementById("preview-content");
+  if (!placeholder || !content) return;
+
+  // Before any topic is picked, show the placeholder line
+  if (!state.goal) {
+    placeholder.hidden = false;
+    content.hidden = true;
+    return;
+  }
+  placeholder.hidden = true;
+  content.hidden = false;
+
+  const c = deriveCanonical();
+  const chatgpt = adaptForChatGPT(c);
+  const claude  = adaptForClaude(c);
+  const gemini  = adaptForGemini(c);
+
+  fillPreviewPanel("chatgpt", buildChatGPTPanel(chatgpt, { mode: "preview" }));
+  fillPreviewPanel("claude",  buildSinglePanel("claude", claude, { mode: "preview" }));
+  fillPreviewPanel("gemini",  buildSinglePanel("gemini", gemini.text, { trimmed: gemini.trimmed, mode: "preview" }));
+}
+
+function fillPreviewPanel(name, nodes) {
+  const panel = document.querySelector(`[data-preview-panel="${name}"]`);
+  if (panel) panel.replaceChildren(...nodes);
+}
+
+function wirePreviewTabs() {
+  document.querySelectorAll('[data-preview-tab]').forEach(tab => {
+    tab.addEventListener("click", () => activatePreviewTab(tab.dataset.previewTab));
+  });
+}
+
+function activatePreviewTab(name) {
+  document.querySelectorAll('[data-preview-tab]').forEach(t => {
+    t.setAttribute("aria-selected", t.dataset.previewTab === name ? "true" : "false");
+  });
+  document.querySelectorAll('[data-preview-panel]').forEach(p => {
+    p.hidden = (p.dataset.previewPanel !== name);
+  });
+}
+
+function wirePreviewToggle() {
+  // The <details> open/closed state persists per-user via localStorage.
+  const det = document.getElementById("preview-details");
+  if (!det) return;
+  // Restore prior state (default closed on mobile, open on desktop)
+  const saved = (() => { try { return localStorage.getItem(PREVIEW_OPEN_KEY); } catch { return null; } })();
+  if (saved === "open")       det.open = true;
+  else if (saved === "closed") det.open = false;
+  else                         det.open = window.matchMedia("(min-width: 900px)").matches;
+
+  det.addEventListener("toggle", () => {
+    try { localStorage.setItem(PREVIEW_OPEN_KEY, det.open ? "open" : "closed"); } catch {}
+  });
+}
+
 function fillPanel(name, nodes) {
   const panel = document.querySelector(`[data-panel="${name}"]`);
   panel.replaceChildren(...nodes);
 }
 
-function buildChatGPTPanel({ text, sliders }) {
+function buildChatGPTPanel({ text, sliders }, opts = {}) {
+  const isPreview = opts.mode === "preview";
   const svc = services.chatgpt;
-  const nodes = [
-    makeHint(svc.where_to_paste_human, svc.settings_url),
-    makeOutputBlock(null, text, svc.char_limit_per_box),
-  ];
-  if (sliders && sliders.length) {
+  const nodes = [];
+  if (!isPreview) nodes.push(makeHint(svc.where_to_paste_human, svc.settings_url));
+  nodes.push(makeOutputBlock(null, text, svc.char_limit_per_box, { isPreview }));
+  if (sliders && sliders.length && !isPreview) {
     nodes.push(makeSliderRecommendations(sliders));
   }
-  nodes.push(makeVerifiedStamp());
+  if (!isPreview) nodes.push(makeVerifiedStamp());
   return nodes;
 }
 
@@ -765,11 +918,13 @@ function makeSliderRecommendations(sliders) {
 }
 
 function buildSinglePanel(name, text, opts = {}) {
+  const isPreview = opts.mode === "preview";
   const svc = services[name];
-  const nodes = [makeHint(svc.where_to_paste_human, svc.settings_url)];
-  if (opts.trimmed) nodes.push(makeWarning(copy.output.char_warning));
-  nodes.push(makeOutputBlock(null, text, svc.char_limit));
-  nodes.push(makeVerifiedStamp());
+  const nodes = [];
+  if (!isPreview) nodes.push(makeHint(svc.where_to_paste_human, svc.settings_url));
+  if (opts.trimmed && !isPreview) nodes.push(makeWarning(copy.output.char_warning));
+  nodes.push(makeOutputBlock(null, text, svc.char_limit, { isPreview }));
+  if (!isPreview) nodes.push(makeVerifiedStamp());
   return nodes;
 }
 
@@ -793,9 +948,10 @@ function makeHint(text, url) {
   return div;
 }
 
-function makeOutputBlock(label, text, charLimit) {
+function makeOutputBlock(label, text, charLimit, opts = {}) {
+  const isPreview = !!opts.isPreview;
   const wrap = document.createElement("div");
-  wrap.className = "tab-panel__output-block";
+  wrap.className = isPreview ? "preview__output-block" : "tab-panel__output-block";
 
   if (label) {
     const lbl = document.createElement("span");
@@ -805,28 +961,32 @@ function makeOutputBlock(label, text, charLimit) {
   }
 
   const ta = document.createElement("textarea");
-  ta.className = "tab-panel__output";
+  ta.className = isPreview ? "preview__output" : "tab-panel__output";
   ta.value = text;
   ta.spellcheck = false;
-  ta.rows = Math.min(20, Math.max(8, text.split("\n").length + 1));
+  ta.readOnly = isPreview;
+  // Preview pane uses a small fixed height; output pane sizes to content.
+  ta.rows = isPreview ? 10 : Math.min(20, Math.max(8, text.split("\n").length + 1));
   wrap.appendChild(ta);
 
-  const meta = document.createElement("div");
-  meta.className = "tab-panel__meta";
-  if (charLimit) {
-    const counter = document.createElement("span");
-    counter.textContent = fmt(copy.output.char_counter, { used: text.length, max: charLimit });
-    if (text.length > charLimit) counter.style.color = "var(--error)";
-    meta.appendChild(counter);
-  }
+  if (!isPreview) {
+    const meta = document.createElement("div");
+    meta.className = "tab-panel__meta";
+    if (charLimit) {
+      const counter = document.createElement("span");
+      counter.textContent = fmt(copy.output.char_counter, { used: text.length, max: charLimit });
+      if (text.length > charLimit) counter.style.color = "var(--error)";
+      meta.appendChild(counter);
+    }
 
-  const copyBtn = document.createElement("button");
-  copyBtn.type = "button";
-  copyBtn.className = "button button--ghost tab-panel__copy";
-  copyBtn.textContent = copy.output.copy_button;
-  copyBtn.addEventListener("click", () => copyText(ta.value, copyBtn, ta));
-  wrap.appendChild(copyBtn);
-  wrap.appendChild(meta);
+    const copyBtn = document.createElement("button");
+    copyBtn.type = "button";
+    copyBtn.className = "button button--ghost tab-panel__copy";
+    copyBtn.textContent = copy.output.copy_button;
+    copyBtn.addEventListener("click", () => copyText(ta.value, copyBtn, ta));
+    wrap.appendChild(copyBtn);
+    wrap.appendChild(meta);
+  }
 
   return wrap;
 }

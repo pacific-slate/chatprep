@@ -148,6 +148,32 @@ a:hover { color: var(--accent-hover); }
   padding: var(--gap-lg) var(--gap-md) var(--gap-xl);
 }
 
+/* Layout: when the live preview is active, switch to split-screen on desktop.
+   On mobile (<900px), stay single-column and let the preview render below as
+   a collapsible <details>. */
+.layout {
+  display: block;
+}
+.layout--with-preview {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0;
+}
+@media (min-width: 900px) {
+  .layout--with-preview {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: var(--gap-lg);
+    align-items: start;
+    padding: 0 var(--gap-md);
+  }
+  .layout--with-preview .wizard {
+    margin: 0;
+    padding: var(--gap-lg) 0 var(--gap-xl);
+    max-width: none;
+  }
+}
+
 .site-footer {
   border-top: 1px solid var(--border);
   padding: var(--gap-md);
@@ -639,7 +665,130 @@ h2.screen__heading { font-size: var(--text-h2); }
   border-radius: var(--radius-md);
 }
 
-/* ============ 12. ARTICLE PAGES (about, privacy) ============ */
+/* ============ 12. RESUME BANNER ============ */
+.resume-banner {
+  max-width: var(--max-readable);
+  margin: var(--gap-sm) auto 0;
+  padding: 0.6rem var(--gap-md);
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--accent) 25%, var(--border));
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--gap-sm);
+  font-size: var(--text-small);
+}
+.resume-banner__text { flex: 1; color: var(--text); }
+.resume-banner__dismiss {
+  background: none;
+  border: 0;
+  color: var(--muted);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0.2rem 0.4rem;
+}
+.button--small {
+  min-height: 32px;
+  padding: 0.35rem 0.9rem;
+  font-size: var(--text-small);
+}
+
+/* ============ 13. LIVE PREVIEW PANE ============ */
+.preview {
+  padding: var(--gap-md);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  margin: var(--gap-lg) var(--gap-md);
+  font-size: var(--text-small);
+}
+
+@media (min-width: 900px) {
+  .preview {
+    position: sticky;
+    top: var(--gap-md);
+    margin: var(--gap-lg) 0;
+    max-height: calc(100vh - 4rem);
+    overflow-y: auto;
+  }
+  /* Always-open on desktop — the <summary> chevron toggle is mobile-only */
+  .preview__details > summary {
+    list-style: none;
+    cursor: default;
+    pointer-events: none;
+  }
+  .preview__chevron { display: none; }
+}
+
+.preview__details {
+  margin: 0;
+}
+.preview__summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  font-weight: 600;
+  padding: 0.2rem 0;
+  list-style: none;
+}
+.preview__summary::-webkit-details-marker { display: none; }
+.preview__label {
+  font-size: var(--text-small);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+.preview__chevron {
+  color: var(--muted);
+  transition: transform 200ms;
+}
+.preview__details[open] .preview__chevron { transform: rotate(180deg); }
+
+.preview__body {
+  margin-top: var(--gap-sm);
+}
+
+.preview__placeholder {
+  margin: 0;
+  padding: var(--gap-md) 0;
+  color: var(--muted);
+  font-style: italic;
+  text-align: center;
+}
+
+.preview__tabs {
+  margin: 0 0 var(--gap-sm);
+  border-bottom: 1px solid var(--border);
+}
+.preview__tabs .tab {
+  padding: 0.5rem 0.8rem;
+  font-size: var(--text-small);
+  min-height: 36px;
+}
+
+.preview__panel[hidden] { display: none; }
+
+.preview__output-block {
+  margin: 0;
+}
+
+.preview__output {
+  width: 100%;
+  padding: 0.7rem;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  line-height: 1.5;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  resize: none;
+  white-space: pre-wrap;
+  cursor: default;
+}
+
+/* ============ 14. ARTICLE PAGES (about, privacy) ============ */
 .screen article, article.screen {
   font-size: var(--text-base);
 }

@@ -11,13 +11,17 @@
   },
 
   "intro": {
-    "heading": "Set up AI to work the way you think.",
-    "subhead": "A free, friendly walk-through. We'll ask you a few simple questions, then give you something you can paste into ChatGPT, Claude, or Gemini to make it work better for you.",
-    "reassurance_1": "It takes about 2 minutes.",
-    "reassurance_2": "You don't need to make an account. There's nothing to install.",
-    "reassurance_3": "Nothing you type here is sent anywhere — not even to us.",
-    "cta_start": "Let's begin",
+    "heading": "What do you mostly want AI to help with?",
+    "subhead": "Pick the one that fits best — we'll build instructions you can paste into ChatGPT, Claude, or Gemini. Takes about 2 minutes. No account.",
     "cta_resume": "Pick up where you left off"
+  },
+
+  "preview": {
+    "label": "Live preview",
+    "placeholder": "Pick a topic to see your template start to take shape.",
+    "tab_help": "Switch tabs to see how the template looks for each AI.",
+    "toggle_label_open": "Hide preview",
+    "toggle_label_closed": "Show preview"
   },
 
   "nav": {
@@ -29,6 +33,7 @@
   },
 
   "step1": {
+    "_comment": "Step 1 question is now embedded directly in the homepage (intro). These options drive that tile grid.",
     "heading": "What do you mostly want AI to help with?",
     "subhead": "Pick the one that fits best. You can change it later.",
     "options": [
