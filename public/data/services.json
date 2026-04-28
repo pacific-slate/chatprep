@@ -1,0 +1,40 @@
+{
+  "_comment": "Per-service config. THE single file to update when AI services change. Re-verify quarterly. Char limits are approximate — phrase guidance qualitatively in copy.json.",
+  "_last_verified": "2026-04-27",
+
+  "chatgpt": {
+    "name": "ChatGPT",
+    "vendor": "OpenAI",
+    "settings_url": "https://chatgpt.com/#settings/Personalization",
+    "where_to_paste_human": "Open ChatGPT, click your profile (top right) → Settings → Personalization → Custom instructions. There are two boxes; we'll show you which goes where.",
+    "two_box": true,
+    "char_limit_per_box": 1500,
+    "supports_files": false,
+    "free_tier": true,
+    "notes": "Custom instructions apply to all chats."
+  },
+
+  "claude": {
+    "name": "Claude",
+    "vendor": "Anthropic",
+    "settings_url": "https://claude.ai/projects",
+    "where_to_paste_human": "Open Claude, click \"Projects\" in the left sidebar, then \"Create project.\" Paste this whole thing into the project description.",
+    "two_box": false,
+    "char_limit": 200000,
+    "supports_files": true,
+    "free_tier": false,
+    "notes": "Projects keep your instructions separate from your normal chats. Requires Claude Pro for full features."
+  },
+
+  "gemini": {
+    "name": "Gemini",
+    "vendor": "Google",
+    "settings_url": "https://gemini.google.com/gems",
+    "where_to_paste_human": "Open Gemini, click \"Gems\" in the sidebar → \"New Gem.\" Paste this into the instructions box.",
+    "two_box": false,
+    "char_limit": 4000,
+    "supports_files": true,
+    "free_tier": true,
+    "notes": "Gemini has a stricter length limit than the others — we automatically trim optional sections to fit."
+  }
+}

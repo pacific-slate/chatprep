@@ -1,0 +1,33 @@
+{
+  "_comment": "Plain-English industry buckets — broad enough that anyone fits without typing their employer. Loosely based on NAICS top-level (~20 categories) but rephrased for non-technical users. Always include 'Something else' as the escape hatch.",
+  "_version": "0.0.1",
+
+  "industries": [
+    "Healthcare or medicine",
+    "Education or teaching",
+    "Retail or shopping",
+    "Food or restaurants",
+    "Construction or trades",
+    "Manufacturing or factory work",
+    "Transportation or logistics",
+    "Technology or software",
+    "Finance or banking",
+    "Real estate or property",
+    "Legal or law",
+    "Government or public service",
+    "Non-profit or charity",
+    "Arts, media, or entertainment",
+    "Marketing or advertising",
+    "Science or research",
+    "Agriculture or farming",
+    "Hospitality or travel",
+    "Religion or spirituality",
+    "Military or defense",
+    "Self-employed or freelance",
+    "Student",
+    "Retired",
+    "Stay-at-home parent or caregiver",
+    "Looking for work",
+    "Something else"
+  ]
+}

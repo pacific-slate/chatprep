@@ -1,0 +1,137 @@
+{
+  "_comment": "All user-facing strings. Voice: gentle, plain English, never condescending. Reading age ~8th grade. No jargon (avoid 'system prompt', 'context window', 'fine-tune'). Reassuring without being saccharine. When in doubt, write it the way you'd say it to your aunt.",
+  "_version": "0.0.2",
+  "_last_verified": "2026-04-27",
+
+  "site": {
+    "title": "ChatPrep — Personalize ChatGPT, Claude, and Gemini",
+    "tagline": "Set up AI to work the way you think.",
+    "footer_privacy": "Nothing you type leaves your browser. No accounts. No tracking."
+  },
+
+  "intro": {
+    "heading": "Set up AI to work the way you think.",
+    "subhead": "A free, friendly walk-through. We'll ask you a few simple questions, then give you something you can paste into ChatGPT, Claude, or Gemini to make it work better for you.",
+    "reassurance_1": "It takes about 3 minutes.",
+    "reassurance_2": "You don't need to make an account. There's nothing to install.",
+    "reassurance_3": "Nothing you type here is sent anywhere — not even to us.",
+    "cta_start": "Let's begin",
+    "cta_resume": "Pick up where you left off"
+  },
+
+  "nav": {
+    "back": "Back",
+    "continue": "Continue",
+    "skip": "Skip this",
+    "start_over": "Start over",
+    "step_label": "Step {n} of {total}"
+  },
+
+  "step1": {
+    "heading": "What do you mostly want AI to help with?",
+    "subhead": "Pick the one that fits best. You can choose more later.",
+    "options": [
+      { "id": "writing",  "label": "Writing",      "hint": "Emails, essays, reports — anything with words." },
+      { "id": "learning", "label": "Learning",     "hint": "Studying, understanding new topics, getting tutored." },
+      { "id": "work",     "label": "Work",         "hint": "Meetings, planning, summaries, professional tasks." },
+      { "id": "coding",   "label": "Coding",       "hint": "Writing, debugging, or learning to code." },
+      { "id": "daily",    "label": "Daily life",   "hint": "Recipes, travel, errands, the household." },
+      { "id": "creative", "label": "Creative",     "hint": "Stories, art ideas, music, poems, brainstorming." }
+    ],
+    "error_required": "Please pick one to continue. You can change it later."
+  },
+
+  "step2": {
+    "heading": "How comfortable are you with AI tools?",
+    "subhead": "Be honest — there's no wrong answer. We'll match the explanations to wherever you're at.",
+    "options": [
+      { "id": "new",       "label": "I've never used AI",        "hint": "We'll keep things simple." },
+      { "id": "casual",    "label": "I've tried it a few times", "hint": "We'll skip the basics." },
+      { "id": "regular",   "label": "I use it regularly",         "hint": "We'll go a little deeper." }
+    ],
+    "error_required": "Please pick the one that fits best."
+  },
+
+  "step3": {
+    "heading": "Which AI services do you have access to?",
+    "subhead": "Check any that apply. If you're not sure, that's fine — pick \"I don't know\" and we'll suggest one.",
+    "options": [
+      { "id": "chatgpt_free",  "label": "ChatGPT (free)" },
+      { "id": "chatgpt_plus",  "label": "ChatGPT Plus or Pro (paid)" },
+      { "id": "claude",        "label": "Claude" },
+      { "id": "gemini",        "label": "Gemini (Google)" },
+      { "id": "copilot_work",  "label": "Microsoft Copilot at work" },
+      { "id": "unsure",        "label": "I'm not sure" }
+    ],
+    "error_required": "Please check at least one — even \"I'm not sure\" is fine."
+  },
+
+  "step4": {
+    "heading": "A little about you",
+    "subhead": "This helps the AI talk to you in a way that fits your life. We don't ask for your name, address, or anything that could identify you. Keep it general — \"a teacher in California\" is plenty.",
+    "industry_label": "What kind of work do you do?",
+    "industry_placeholder": "Type to search — e.g. healthcare, education, retail",
+    "industry_other": "Something else",
+    "role_label": "What's your role?",
+    "role_placeholder": "e.g. teacher, manager, student, retired",
+    "country_label": "Where are you?",
+    "country_placeholder": "Country",
+    "hobbies_label": "Hobbies or interests (optional)",
+    "hobbies_placeholder": "e.g. cooking, hiking, reading, woodworking",
+    "hobbies_hint": "If you mention these, the AI can use them to explain things in ways that click for you.",
+    "detail_label": "How much detail do you want the AI to know about you?",
+    "detail_options": [
+      { "id": "minimal",  "label": "Just the basics", "hint": "Quick and private." },
+      { "id": "standard", "label": "A bit more",       "hint": "Helpful for most people." },
+      { "id": "detailed", "label": "Lots of detail",   "hint": "More personal answers, but more for you to share." }
+    ]
+  },
+
+  "step5": {
+    "heading": "Anything you want the AI to avoid?",
+    "subhead": "Pet peeves, things that bug you, or just preferences. Skip if you don't have any.",
+    "options": [
+      { "id": "no_emoji",      "label": "No emoji",                              "hint": "Plain text only." },
+      { "id": "no_jokes",      "label": "No jokes or filler",                    "hint": "Get to the point." },
+      { "id": "cite_sources",  "label": "Always cite sources for facts",         "hint": "So you can double-check." },
+      { "id": "plain_english", "label": "Use plain English, not jargon",          "hint": "" },
+      { "id": "show_work",     "label": "Show worked examples for math or code", "hint": "" },
+      { "id": "no_pretend",    "label": "Don't pretend to have personal experiences", "hint": "" },
+      { "id": "neutral_pol",   "label": "Stay neutral on politics",              "hint": "" }
+    ],
+    "freetext_label": "Anything else? (optional)",
+    "freetext_placeholder": "e.g. \"don't use exclamation points\""
+  },
+
+  "output": {
+    "heading": "Here's what to paste.",
+    "subhead": "We've made three versions — one for each service. Same idea, just formatted to fit each one's quirks. Pick the tab for the AI you use, hit Copy, and paste it into the right spot.",
+    "tabs": {
+      "chatgpt": "ChatGPT",
+      "claude":  "Claude",
+      "gemini":  "Gemini"
+    },
+    "copy_button":          "Copy to clipboard",
+    "copy_button_copied":   "✓ Copied",
+    "where_to_paste_label": "Where to paste this:",
+    "char_counter":         "{used} of {max} characters used",
+    "char_warning":         "We trimmed a few optional bits to fit. The most important parts are still there.",
+    "verified_stamp":       "Last verified: {date}. AI services change — check our notes if something looks off.",
+    "why_three_heading":    "Why three different formats?",
+    "why_three_body":       "Each service has its own quirks: ChatGPT splits your instructions into two boxes; Claude takes one long block; Gemini has a strict length limit. Same instructions underneath — just packaged differently.",
+    "start_over_cta":       "Start over with different answers"
+  },
+
+  "errors": {
+    "generic":          "Something didn't work. Try again, and if it keeps happening, please tell us at the link in the footer.",
+    "storage_blocked":  "Your browser is blocking the temporary storage we use to remember your answers between steps. The wizard still works — but if you refresh the page, you'll need to start over.",
+    "clipboard_failed": "Couldn't copy automatically. Select the text below and copy it manually."
+  },
+
+  "footer": {
+    "about":   "About",
+    "privacy": "Privacy",
+    "github":  "View source on GitHub",
+    "made_by": "Made by a person, not a company."
+  }
+}

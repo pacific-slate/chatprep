@@ -2,17 +2,206 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="A free wizard that builds copy-paste personalization templates for ChatGPT, Claude, and Gemini. No accounts. No tracking. Runs entirely in your browser.">
-  <title>ChatPrep — Personalize ChatGPT, Claude, and Gemini</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A free, gentle wizard that builds copy-paste personalization templates for ChatGPT, Claude, and Gemini. No accounts. No tracking. Runs entirely in your browser.">
+  <meta name="color-scheme" content="light dark">
+  <title>ChatPrep — Set up AI to work the way you think</title>
   <link rel="stylesheet" href="styles.css">
 </head>
+
 <body>
-  <main>
-    <h1>ChatPrep — coming soon</h1>
-    <p>A free, no-account wizard for personalizing ChatGPT, Claude, and Gemini.</p>
-    <p>This site runs entirely in your browser. Nothing you type is sent anywhere.</p>
+
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <header class="site-header">
+    <a href="/" class="site-title" aria-label="ChatPrep home">
+      <span class="site-title__mark" aria-hidden="true">▣</span>
+      <span class="site-title__text">ChatPrep</span>
+    </a>
+    <p class="site-tagline" data-copy="site.footer_privacy">Nothing you type leaves your browser. No accounts. No tracking.</p>
+  </header>
+
+  <main id="main" class="wizard">
+
+    <!-- ================== INTRO ================== -->
+    <section id="screen-intro" class="screen" aria-labelledby="intro-heading">
+      <h1 id="intro-heading" class="screen__heading" data-copy="intro.heading">Set up AI to work the way you think.</h1>
+      <p class="screen__subhead" data-copy="intro.subhead"></p>
+
+      <ul class="reassurance">
+        <li><span class="reassurance__check" aria-hidden="true">✓</span> <span data-copy="intro.reassurance_1"></span></li>
+        <li><span class="reassurance__check" aria-hidden="true">✓</span> <span data-copy="intro.reassurance_2"></span></li>
+        <li><span class="reassurance__check" aria-hidden="true">✓</span> <span data-copy="intro.reassurance_3"></span></li>
+      </ul>
+
+      <div class="screen__actions">
+        <button type="button" class="button button--primary" data-action="start" data-copy="intro.cta_start">Let's begin</button>
+        <button type="button" class="button button--ghost" data-action="resume" hidden data-copy="intro.cta_resume">Pick up where you left off</button>
+      </div>
+    </section>
+
+    <!-- ================== STEP 1 ================== -->
+    <section id="screen-step1" class="screen" aria-labelledby="step1-heading" hidden>
+      <p class="step-label" data-copy="nav.step_label" data-step-n="1" data-step-total="5">Step 1 of 5</p>
+      <h2 id="step1-heading" class="screen__heading" data-copy="step1.heading"></h2>
+      <p class="screen__subhead" data-copy="step1.subhead"></p>
+
+      <fieldset class="tile-group" data-field="goal" data-required="true">
+        <legend class="visually-hidden" data-copy="step1.heading"></legend>
+        <!-- Tiles rendered by JS from copy.step1.options -->
+      </fieldset>
+
+      <p class="error-message" data-error-for="goal" hidden></p>
+
+      <nav class="step-nav">
+        <button type="button" class="button button--ghost" data-action="back" data-copy="nav.back">Back</button>
+        <button type="button" class="button button--primary" data-action="continue" data-copy="nav.continue">Continue</button>
+      </nav>
+    </section>
+
+    <!-- ================== STEP 2 ================== -->
+    <section id="screen-step2" class="screen" aria-labelledby="step2-heading" hidden>
+      <p class="step-label" data-copy="nav.step_label" data-step-n="2" data-step-total="5"></p>
+      <h2 id="step2-heading" class="screen__heading" data-copy="step2.heading"></h2>
+      <p class="screen__subhead" data-copy="step2.subhead"></p>
+
+      <fieldset class="tile-group" data-field="comfort" data-required="true">
+        <legend class="visually-hidden" data-copy="step2.heading"></legend>
+      </fieldset>
+
+      <p class="error-message" data-error-for="comfort" hidden></p>
+
+      <nav class="step-nav">
+        <button type="button" class="button button--ghost" data-action="back" data-copy="nav.back">Back</button>
+        <button type="button" class="button button--primary" data-action="continue" data-copy="nav.continue">Continue</button>
+      </nav>
+    </section>
+
+    <!-- ================== STEP 3 ================== -->
+    <section id="screen-step3" class="screen" aria-labelledby="step3-heading" hidden>
+      <p class="step-label" data-copy="nav.step_label" data-step-n="3" data-step-total="5"></p>
+      <h2 id="step3-heading" class="screen__heading" data-copy="step3.heading"></h2>
+      <p class="screen__subhead" data-copy="step3.subhead"></p>
+
+      <fieldset class="checkbox-group" data-field="services" data-required="true" data-multi="true">
+        <legend class="visually-hidden" data-copy="step3.heading"></legend>
+      </fieldset>
+
+      <p class="error-message" data-error-for="services" hidden></p>
+
+      <nav class="step-nav">
+        <button type="button" class="button button--ghost" data-action="back" data-copy="nav.back">Back</button>
+        <button type="button" class="button button--primary" data-action="continue" data-copy="nav.continue">Continue</button>
+      </nav>
+    </section>
+
+    <!-- ================== STEP 4 ================== -->
+    <section id="screen-step4" class="screen" aria-labelledby="step4-heading" hidden>
+      <p class="step-label" data-copy="nav.step_label" data-step-n="4" data-step-total="5"></p>
+      <h2 id="step4-heading" class="screen__heading" data-copy="step4.heading"></h2>
+      <p class="screen__subhead" data-copy="step4.subhead"></p>
+
+      <div class="form-row">
+        <label class="form-label" for="field-industry" data-copy="step4.industry_label"></label>
+        <input class="form-input" id="field-industry" type="text" list="list-industries" autocomplete="off" data-field="industry" data-copy-attr="placeholder:step4.industry_placeholder">
+        <datalist id="list-industries"></datalist>
+      </div>
+
+      <div class="form-row">
+        <label class="form-label" for="field-role" data-copy="step4.role_label"></label>
+        <input class="form-input" id="field-role" type="text" autocomplete="off" data-field="role" data-copy-attr="placeholder:step4.role_placeholder">
+      </div>
+
+      <div class="form-row">
+        <label class="form-label" for="field-country" data-copy="step4.country_label"></label>
+        <input class="form-input" id="field-country" type="text" autocomplete="country-name" data-field="country" data-copy-attr="placeholder:step4.country_placeholder">
+      </div>
+
+      <div class="form-row">
+        <label class="form-label" for="field-hobbies" data-copy="step4.hobbies_label"></label>
+        <input class="form-input" id="field-hobbies" type="text" maxlength="200" data-field="hobbies" data-copy-attr="placeholder:step4.hobbies_placeholder">
+        <p class="form-hint" data-copy="step4.hobbies_hint"></p>
+      </div>
+
+      <fieldset class="tile-group tile-group--small" data-field="detail" data-required="true">
+        <legend class="form-label" data-copy="step4.detail_label"></legend>
+      </fieldset>
+
+      <nav class="step-nav">
+        <button type="button" class="button button--ghost" data-action="back" data-copy="nav.back">Back</button>
+        <button type="button" class="button button--primary" data-action="continue" data-copy="nav.continue">Continue</button>
+      </nav>
+    </section>
+
+    <!-- ================== STEP 5 ================== -->
+    <section id="screen-step5" class="screen" aria-labelledby="step5-heading" hidden>
+      <p class="step-label" data-copy="nav.step_label" data-step-n="5" data-step-total="5"></p>
+      <h2 id="step5-heading" class="screen__heading" data-copy="step5.heading"></h2>
+      <p class="screen__subhead" data-copy="step5.subhead"></p>
+
+      <fieldset class="checkbox-group" data-field="avoid" data-multi="true">
+        <legend class="visually-hidden" data-copy="step5.heading"></legend>
+      </fieldset>
+
+      <div class="form-row">
+        <label class="form-label" for="field-avoid-other" data-copy="step5.freetext_label"></label>
+        <textarea class="form-input form-input--multiline" id="field-avoid-other" maxlength="300" rows="3" data-field="avoid_other" data-copy-attr="placeholder:step5.freetext_placeholder"></textarea>
+      </div>
+
+      <nav class="step-nav">
+        <button type="button" class="button button--ghost" data-action="back" data-copy="nav.back">Back</button>
+        <button type="button" class="button button--primary" data-action="finish" data-copy="nav.continue">See my templates</button>
+      </nav>
+    </section>
+
+    <!-- ================== OUTPUT ================== -->
+    <section id="screen-output" class="screen screen--output" aria-labelledby="output-heading" hidden>
+      <h2 id="output-heading" class="screen__heading" data-copy="output.heading"></h2>
+      <p class="screen__subhead" data-copy="output.subhead"></p>
+
+      <div class="tabs" role="tablist" aria-label="AI service formats">
+        <button type="button" class="tab" role="tab" data-tab="chatgpt" aria-selected="true" id="tab-chatgpt">
+          <span data-copy="output.tabs.chatgpt"></span>
+        </button>
+        <button type="button" class="tab" role="tab" data-tab="claude" aria-selected="false" id="tab-claude">
+          <span data-copy="output.tabs.claude"></span>
+        </button>
+        <button type="button" class="tab" role="tab" data-tab="gemini" aria-selected="false" id="tab-gemini">
+          <span data-copy="output.tabs.gemini"></span>
+        </button>
+      </div>
+
+      <div class="tab-panels">
+        <article class="tab-panel" role="tabpanel" data-panel="chatgpt" aria-labelledby="tab-chatgpt"></article>
+        <article class="tab-panel" role="tabpanel" data-panel="claude"  aria-labelledby="tab-claude"  hidden></article>
+        <article class="tab-panel" role="tabpanel" data-panel="gemini"  aria-labelledby="tab-gemini"  hidden></article>
+      </div>
+
+      <details class="details">
+        <summary data-copy="output.why_three_heading"></summary>
+        <p data-copy="output.why_three_body"></p>
+      </details>
+
+      <nav class="step-nav step-nav--end">
+        <button type="button" class="button button--ghost" data-action="restart" data-copy="output.start_over_cta"></button>
+      </nav>
+    </section>
+
   </main>
+
+  <footer class="site-footer">
+    <p class="site-footer__line" data-copy="footer.made_by">Made by a person, not a company.</p>
+    <ul class="site-footer__links">
+      <li><a href="https://github.com/pacific-slate/chatprep" rel="noopener" data-copy="footer.github">View source on GitHub</a></li>
+    </ul>
+  </footer>
+
+  <noscript>
+    <div class="noscript-warning">
+      <p>This site needs JavaScript to walk you through the questions. JavaScript runs only in your browser — nothing is sent anywhere. If you'd rather not enable it, the project is fully open source: <a href="https://github.com/pacific-slate/chatprep">github.com/pacific-slate/chatprep</a>.</p>
+    </div>
+  </noscript>
+
   <script src="app.js" type="module"></script>
 </body>
 </html>

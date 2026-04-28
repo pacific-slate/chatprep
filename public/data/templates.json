@@ -1,0 +1,87 @@
+{
+  "_comment": "Template generation data. Canonical skeleton + per-input derivation rules + per-service adapters. Logic in app.js stays minimal — most tuning happens by editing this file.",
+  "_version": "0.0.2",
+  "_last_verified": "2026-04-27",
+
+  "skeleton": {
+    "about_me": "I'm a {role} working in {industry}. I'm based in {country}.",
+    "goals_lead": "What I mostly want from you:",
+    "tone_lead": "How I'd like you to respond:",
+    "always_lead": "Things to always do:",
+    "avoid_lead": "Things to avoid:",
+    "fallback": "If you're not sure what I mean, ask me a clarifying question rather than guessing."
+  },
+
+  "goals_by_q1": {
+    "writing":  "Help me write more clearly. Suggest edits and stronger phrasings.",
+    "learning": "Help me learn new things. Explain in plain language and check that I understand before moving on.",
+    "work":     "Help me with professional tasks like emails, meeting prep, summaries, and planning.",
+    "coding":   "Help me write, debug, and understand code. Show worked examples.",
+    "daily":    "Help me with everyday life — recipes, errands, planning, household decisions.",
+    "creative": "Help me brainstorm and create. Riff with me; don't over-correct my voice."
+  },
+
+  "tone_by_comfort": {
+    "new":     { "tone": "warm and patient", "reading_level": "plain English, the kind a 12-year-old would understand. No jargon." },
+    "casual":  { "tone": "friendly and clear", "reading_level": "everyday English. Define any technical terms you use." },
+    "regular": { "tone": "direct and efficient", "reading_level": "professional. Skip the hand-holding." }
+  },
+
+  "format_by_q1": {
+    "writing":  "Prose with examples. Show before/after when you suggest edits.",
+    "learning": "Walk me through it step by step. Ask me questions to check my understanding.",
+    "work":     "Bullets and short paragraphs. Lead with the bottom line.",
+    "coding":   "Code blocks with brief explanations. Comment any non-obvious lines.",
+    "daily":    "Short, practical answers. Skip the throat-clearing.",
+    "creative": "Match the tone of whatever I'm working on. Offer options when relevant."
+  },
+
+  "length_by_detail": {
+    "minimal":  "Keep responses short — a few sentences is usually enough.",
+    "standard": "Medium-length responses. Expand if I ask.",
+    "detailed": "Go into depth when it helps. I'll tell you to shorten if it's too much."
+  },
+
+  "always_rules": {
+    "cite_sources":  "Cite the source whenever you state a fact. If you're guessing, say so.",
+    "plain_english": "Use plain English. Define any technical terms.",
+    "show_work":     "Show your work for math, code, and any reasoning that has multiple steps."
+  },
+
+  "avoid_rules": {
+    "no_emoji":      "No emoji.",
+    "no_jokes":      "No jokes, filler, or padding. Get to the point.",
+    "no_pretend":    "Don't pretend to have personal experiences or feelings you don't have.",
+    "neutral_pol":   "Stay neutral on politics, religion, and other sensitive topics unless I ask directly.",
+    "no_pii":        "Never ask me for sensitive personal info — full address, passwords, financial details, social security."
+  },
+
+  "service_adapters": {
+    "chatgpt": {
+      "_comment": "ChatGPT splits instructions into two boxes. Box 1 = about you. Box 2 = how to respond + rules.",
+      "format": "two_box",
+      "box1_label": "What would you like ChatGPT to know about you?",
+      "box1_sections": ["about_me", "goals", "hobbies", "project"],
+      "box2_label": "How would you like ChatGPT to respond?",
+      "box2_sections": ["tone", "format", "length", "always", "avoid", "fallback"],
+      "trim_order": ["project", "hobbies", "always_optional", "avoid_optional"]
+    },
+
+    "claude": {
+      "_comment": "Claude takes one block. XML-style tags help Claude parse structure.",
+      "format": "single_xml",
+      "wrap_open":  "<instructions>",
+      "wrap_close": "</instructions>",
+      "section_template": "<{section}>\n{content}\n</{section}>",
+      "sections": ["about-me", "goals", "tone-and-format", "always", "avoid", "fallback"]
+    },
+
+    "gemini": {
+      "_comment": "Gemini has a hard ~4000 char limit. Trim aggressively if needed.",
+      "format": "single_plain",
+      "char_limit": 4000,
+      "trim_order": ["fallback", "project", "hobbies", "avoid_optional", "always_optional", "tone_detail"],
+      "warn_when_trimmed": true
+    }
+  }
+}
