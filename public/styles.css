@@ -173,6 +173,14 @@ a:hover { color: var(--accent-hover); }
   margin: 0 0 var(--gap-sm);
   letter-spacing: -0.01em;
 }
+/* Heading is given tabindex=-1 + focused on screen-change so screen readers
+   announce the new heading. It's not interactive — suppress the visible
+   outline so sighted users don't see a focus ring on a non-clickable
+   element. Focus state itself is preserved for assistive tech. */
+.screen__heading:focus,
+.screen__heading:focus-visible {
+  outline: none;
+}
 
 @media (max-width: 480px) {
   .screen__heading { font-size: 1.875rem; }   /* 30px on phones */
