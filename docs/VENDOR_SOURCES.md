@@ -87,6 +87,28 @@ This means:
 - Vendor structure is authoritative — we follow it literally.
 - Vendor *content* for consumer use cases is something they leave to the user — ChatPrep's content (tone phrases, "always do" rules, etc.) is our own reasonable synthesis. We've kept it editable in `data/templates.json` so anyone can adjust without touching code.
 
+## Live UI verification (2026-04-27)
+
+In addition to the developer docs above, the actual consumer UIs were verified live via claude-in-chrome on this date. Confirmed findings:
+
+### ChatGPT (help.openai.com/en/articles/8096356, updated 5 days before verification)
+- ✅ **1500 character limit** on long-form text fields (direct quote: *"The longer form text fields have a 1500 character limit"*).
+- ⚠️ Help article phrasing is **ambiguous** about whether the UI still presents two separate text boxes ("What would you like ChatGPT to know about you?" / "How would you like ChatGPT to respond?") or has consolidated to a single Custom Instructions field. We currently generate two boxes — re-verify by logging in to ChatGPT before any release that depends on this.
+- Path web: Settings → Personalization → Enable customization → Custom Instructions field
+- Path mobile: Settings → Customize ChatGPT → Custom Instructions field
+- "Custom instructions are available on all plans on Web, Desktop, iOS, and Android" — quoted from the help article.
+
+### Claude Projects (verified live in claude.ai)
+- ✅ Path: claude.ai → "Projects" (left sidebar) → "+ New project"
+- ✅ Setup form: name field + description field with placeholder *"Describe your project, goals, subject, etc…"*
+- ✅ Char limit: not enforced visibly in the UI (Claude Projects support 200K context, so practically no limit for our use case).
+- ⚠️ A new "Customize" link appeared in Claude's left sidebar (`claude.ai/customize`). Investigated: it's for Skills + Connectors + Plugins (enterprise/power-user features), NOT user-level personalization. ChatPrep continues to target Projects as the correct destination.
+
+### Gemini Gems (verified live in gemini.google.com)
+- ✅ Path: gemini.google.com → "Gems" (left sidebar) → "+ New Gem"
+- ✅ Setup form has three fields: "Give your Gem a name" + "Describe your Gem and explain what it does" (short description) + "Enter a prompt for Gemini" (the instructions textarea where chatprep output goes)
+- ⚠️ Char limit not visible in the UI; widely reported as ~4000 but Google does not publish the number. Need to live-test by pasting a too-long template and checking the error message.
+
 ## How to re-verify
 
 When AI services update — quarterly at minimum — walk this checklist:

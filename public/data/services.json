@@ -1,40 +1,40 @@
 {
-  "_comment": "Per-service config. THE single file to update when AI services change. Re-verify quarterly. Char limits are approximate — phrase guidance qualitatively in copy.json.",
+  "_comment": "Per-service config. THE single file to update when AI services change. Re-verify quarterly. UI strings + paths verified live via claude-in-chrome on _last_verified date.",
   "_last_verified": "2026-04-27",
 
   "chatgpt": {
     "name": "ChatGPT",
     "vendor": "OpenAI",
     "settings_url": "https://chatgpt.com/#settings/Personalization",
-    "where_to_paste_human": "Open ChatGPT, click your profile (top right) → Settings → Personalization → Custom instructions. There are two boxes; we'll show you which goes where.",
+    "where_to_paste_human": "On the web: open ChatGPT → Settings (sidebar) → Personalization → turn on \"Enable customization\" → paste into the Custom Instructions field. On phone: Settings → Customize ChatGPT.",
     "two_box": true,
     "char_limit_per_box": 1500,
     "supports_files": false,
     "free_tier": true,
-    "notes": "Custom instructions apply to all chats."
+    "notes": "Custom instructions apply to all chats. OpenAI's help article (updated April 2026) confirms 1500 character limit on the longer-form text fields. The two-box pattern (\"What would you like ChatGPT to know about you?\" / \"How would you like ChatGPT to respond?\") is what we generate for, but the help article phrasing is ambiguous about whether the UI now consolidates these — verify before each release."
   },
 
   "claude": {
     "name": "Claude",
     "vendor": "Anthropic",
     "settings_url": "https://claude.ai/projects",
-    "where_to_paste_human": "Open Claude, click \"Projects\" in the left sidebar, then \"Create project.\" Paste this whole thing into the project description.",
+    "where_to_paste_human": "Open Claude → Projects (left sidebar) → \"+ New project\" → give it a name → paste the whole template into the description field (placeholder reads \"Describe your project, goals, subject, etc…\").",
     "two_box": false,
     "char_limit": 200000,
     "supports_files": true,
     "free_tier": false,
-    "notes": "Projects keep your instructions separate from your normal chats. Requires Claude Pro for full features."
+    "notes": "Projects keep your instructions separate from your normal chats. Requires Claude Pro for full features. Note: Claude also has a \"Customize\" page (claude.ai/customize) but that's for Skills + Connectors + Plugins (enterprise/power-user features), not user-level personalization — Projects is the right destination for a chatprep template."
   },
 
   "gemini": {
     "name": "Gemini",
     "vendor": "Google",
-    "settings_url": "https://gemini.google.com/gems",
-    "where_to_paste_human": "Open Gemini, click \"Gems\" in the sidebar → \"New Gem.\" Paste this into the instructions box.",
+    "settings_url": "https://gemini.google.com/gems/create",
+    "where_to_paste_human": "Open Gemini → \"Gems\" in the left sidebar → \"+ New Gem\" → fill in the name and short description, then paste the whole template into the large \"Enter a prompt for Gemini\" instructions field.",
     "two_box": false,
     "char_limit": 4000,
     "supports_files": true,
     "free_tier": true,
-    "notes": "Gemini has a stricter length limit than the others — we automatically trim optional sections to fit."
+    "notes": "Gemini has a stricter length limit than the others — we automatically trim optional sections to fit. Char limit (~4000) is widely reported but Google does not publish an exact number; verify via the in-UI counter before each release."
   }
 }
