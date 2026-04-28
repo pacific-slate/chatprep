@@ -1,0 +1,124 @@
+{
+  "_comment": "CLI install walk-through data. Per CLI × OS, lists the install steps in order. Each step has: a plain-English title, an optional what-this-does explanation (shown only when comfort=never), an optional command (shown in a copy box), and an optional troubleshoot note. Re-verify quarterly. When in doubt, the user's link to the official install page below the walk-through is authoritative.",
+  "_last_verified": "2026-04-27",
+
+  "claude_code": {
+    "name": "Claude Code",
+    "vendor": "Anthropic",
+    "official_url": "https://github.com/anthropics/claude-code",
+    "docs_url": "https://docs.claude.com/en/docs/claude-code",
+
+    "what_it_is": "Claude Code is a tool from Anthropic that puts Claude inside your computer's terminal. You point it at a folder (a project, your notes, anything), and it can read every file, write new ones, and remember what you've worked on. Same Claude you use at claude.ai, just way more useful because it has access to your stuff.",
+
+    "what_it_costs": "Free to install. To actually use it, you need either a Claude Pro plan ($20/month, the same one that gets you claude.ai) or an API key billed per use. Most people pick the Pro plan — it's predictable and includes Claude Code at no extra charge.",
+
+    "prereqs": {
+      "headline": "What you need before starting",
+      "items": [
+        {
+          "label": "A Claude account",
+          "body": "Free to make at claude.ai. You'll log into Claude Code with the same account.",
+          "url": "https://claude.ai/login"
+        },
+        {
+          "label": "Node.js (a free piece of software Claude Code is built on)",
+          "body": "If you've never installed Node.js, the steps below cover it. If you have — version 18 or newer is fine."
+        }
+      ]
+    },
+
+    "mac": {
+      "platform_label": "Mac",
+      "steps": [
+        {
+          "title": "Open the Terminal app",
+          "explain_for_beginners": "The terminal is just an app on your Mac, like Safari or Notes. Press ⌘ + Space to open Spotlight, type \"Terminal,\" and press Return. A small window opens with a blinking cursor — that's it. Everything we do here is just typing commands and pressing Return.",
+          "command": null
+        },
+        {
+          "title": "Check if Node.js is already installed",
+          "explain_for_beginners": "Type this command exactly, then press Return. If you see a version number like \"v20.10.0,\" you're set — skip the next step. If you see \"command not found,\" you need to install Node.js (next step).",
+          "command": "node --version"
+        },
+        {
+          "title": "Install Node.js (only if the previous step said \"command not found\")",
+          "explain_for_beginners": "The easiest way is to go to nodejs.org, click the big green LTS button to download the .pkg installer, double-click it when downloaded, and follow the prompts. Restart your terminal afterward.",
+          "command": null,
+          "link": { "label": "Download Node.js for Mac", "url": "https://nodejs.org/" }
+        },
+        {
+          "title": "Install Claude Code",
+          "explain_for_beginners": "This downloads Claude Code from Anthropic and makes it available everywhere on your Mac. You only do this once. The \"-g\" means \"globally\" — install it system-wide, not just in one folder.",
+          "command": "npm install -g @anthropic-ai/claude-code"
+        },
+        {
+          "title": "Launch Claude Code",
+          "explain_for_beginners": "Move into a folder you want to work in (your Desktop, a project folder, anywhere) using the \"cd\" command, then run \"claude\" to start. The first time, it will ask you to log into your Claude account in a browser window.",
+          "command": "cd ~/Desktop\nclaude"
+        }
+      ]
+    },
+
+    "win": {
+      "platform_label": "Windows",
+      "steps": [
+        {
+          "title": "Open PowerShell",
+          "explain_for_beginners": "PowerShell is Windows' terminal app. Click Start, type \"PowerShell,\" and click \"Windows PowerShell.\" A blue or black window opens — that's it. Everything we do here is just typing commands and pressing Enter.",
+          "command": null
+        },
+        {
+          "title": "Check if Node.js is already installed",
+          "explain_for_beginners": "Type this command and press Enter. If you see a version number like \"v20.10.0,\" you're set — skip the next step. If it says it isn't recognized, you need to install Node.js (next step).",
+          "command": "node --version"
+        },
+        {
+          "title": "Install Node.js (only if the previous step didn't show a version)",
+          "explain_for_beginners": "Go to nodejs.org, click the big green LTS button to download the .msi installer, double-click it, and follow the prompts. Restart PowerShell afterward.",
+          "command": null,
+          "link": { "label": "Download Node.js for Windows", "url": "https://nodejs.org/" }
+        },
+        {
+          "title": "Install Claude Code",
+          "explain_for_beginners": "This downloads Claude Code and makes it available everywhere on your computer. You only do this once.",
+          "command": "npm install -g @anthropic-ai/claude-code"
+        },
+        {
+          "title": "Launch Claude Code",
+          "explain_for_beginners": "Move into a folder you want to work in (your Desktop, a project folder) using \"cd\", then run \"claude\". The first time, it will ask you to log into your Claude account in a browser.",
+          "command": "cd $HOME\\Desktop\nclaude"
+        }
+      ]
+    },
+
+    "lin": {
+      "platform_label": "Linux",
+      "steps": [
+        {
+          "title": "Open your terminal",
+          "explain_for_beginners": "Most Linux desktops have Terminal in the application menu, or you can press Ctrl + Alt + T.",
+          "command": null
+        },
+        {
+          "title": "Check if Node.js is installed",
+          "explain_for_beginners": "Type this command. If you see a version like \"v20.10.0,\" you're set — skip the next step.",
+          "command": "node --version"
+        },
+        {
+          "title": "Install Node.js (Ubuntu/Debian; if you're on another distro, use your package manager equivalent)",
+          "explain_for_beginners": "This adds the official Node.js source and installs it. You'll be asked for your password.",
+          "command": "curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -\nsudo apt-get install -y nodejs"
+        },
+        {
+          "title": "Install Claude Code",
+          "command": "sudo npm install -g @anthropic-ai/claude-code"
+        },
+        {
+          "title": "Launch Claude Code",
+          "explain_for_beginners": "Move into a folder, then run \"claude\". First-run will prompt you to log in.",
+          "command": "cd ~\nclaude"
+        }
+      ]
+    }
+  }
+}

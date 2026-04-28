@@ -5,9 +5,28 @@
   "_last_verified": "2026-04-27",
 
   "site": {
-    "title": "ChatPrep — Personalize ChatGPT, Claude, and Gemini",
-    "tagline": "Set up AI to work the way you think.",
+    "title": "ChatPrep — Get more out of AI",
+    "tagline": "Get more out of AI. Free, friendly, no account.",
     "footer_privacy": "Nothing you type leaves your browser. No accounts. No tracking."
+  },
+
+  "routing": {
+    "heading": "Get more out of AI.",
+    "subhead": "Two short walk-throughs. Pick the one that fits where you're at.",
+    "card1": {
+      "kicker": "Walk-through 1",
+      "heading": "Personalize ChatGPT, Claude, or Gemini",
+      "body": "Spend two minutes telling us about you. We build copy-paste instructions that make the AI you already use work the way you think.",
+      "cta": "Personalize my AI",
+      "href": "/personalize"
+    },
+    "card2": {
+      "kicker": "Walk-through 2",
+      "heading": "Basic chat boring? Not working?",
+      "body": "There's a way to supercharge your AI. Tools like Claude Code, Gemini CLI, and Codex turn the AI into a real assistant — one that can read your files, do research for you, and remember what you're working on. We'll get you set up.",
+      "cta": "Show me how",
+      "href": "/supercharge"
+    }
   },
 
   "intro": {
@@ -128,6 +147,79 @@
     "generic":          "Something didn't work. Try again, and if it keeps happening, please tell us at the link in the footer.",
     "storage_blocked":  "Your browser is blocking the temporary storage we use to remember your answers between steps. The wizard still works — but if you refresh the page, you'll need to start over.",
     "clipboard_failed": "Couldn't copy automatically. Select the text below and copy it manually."
+  },
+
+  "supercharge": {
+    "intro": {
+      "heading": "Supercharge your AI",
+      "subhead": "These are AI tools that live on your computer instead of in a chat tab. They can read your files, do research, run for hours on one task, and remember everything you've worked on. They're free to start, and they're how a lot of us actually use AI day to day. We'll get you to your first command. After that, the AI itself can teach you the rest.",
+      "what_is_a_cli_heading": "Why these instead of regular chat?",
+      "what_is_a_cli_body": "Regular AI chat (chatgpt.com, claude.ai, gemini.google.com) is great, but every conversation starts blank — the AI can't see your files, run anything, or remember what you did yesterday. These tools live in a small window on your computer called a terminal, and that means they CAN do all those things. Same AI underneath; way more useful.",
+      "scary_heading": "Sounds technical?",
+      "scary_body": "It's less scary than it looks. You don't need to be a coder. We'll explain every step. Once it's installed, you just type sentences like you would in chat — the tool does the rest.",
+      "cta": "Pick a tool to install"
+    },
+    "step_cli": {
+      "heading": "Which one do you want to try?",
+      "subhead": "All three are good. The differences mostly come down to which AI company you trust most, and what you already pay for.",
+      "options": [
+        {
+          "id": "claude_code",
+          "label": "Claude Code",
+          "vendor": "Anthropic",
+          "best_for": "Best for thoughtful, careful work. Reads your code carefully. Pairs well with the Claude Pro plan ($20/mo) — also works with an API key.",
+          "available": true
+        },
+        {
+          "id": "gemini_cli",
+          "label": "Gemini CLI",
+          "vendor": "Google",
+          "best_for": "Best if you live in Google Workspace (Gmail, Docs, Drive). Generous free tier with a personal Google account.",
+          "available": false,
+          "coming_soon_note": "Walk-through coming soon. The official install instructions are at github.com/google-gemini/gemini-cli."
+        },
+        {
+          "id": "codex",
+          "label": "Codex",
+          "vendor": "OpenAI",
+          "best_for": "Best if you already pay for ChatGPT Plus or Pro. Uses your existing OpenAI account.",
+          "available": false,
+          "coming_soon_note": "Walk-through coming soon. The official install instructions are at github.com/openai/codex."
+        }
+      ],
+      "error_required": "Please pick one."
+    },
+    "step_os": {
+      "heading": "What computer are you on?",
+      "subhead": "We'll show you the right commands.",
+      "options": [
+        { "id": "mac", "label": "Mac",     "hint": "macOS — the install is straightforward." },
+        { "id": "win", "label": "Windows", "hint": "Windows 10 or 11 with PowerShell." },
+        { "id": "lin", "label": "Linux",   "hint": "Most distros work. We'll assume Ubuntu/Debian; the rest is similar." }
+      ],
+      "error_required": "Please pick one."
+    },
+    "step_comfort": {
+      "heading": "Have you used a terminal before?",
+      "subhead": "There's no wrong answer. We'll match the depth of explanation.",
+      "options": [
+        { "id": "never",     "label": "I've never opened one",     "hint": "We'll explain each step in plain English." },
+        { "id": "some",      "label": "I've used it once or twice", "hint": "We'll skip the basics and just give you the commands." },
+        { "id": "comfortable", "label": "I'm comfortable",          "hint": "Just the commands and where to put your API key." }
+      ],
+      "error_required": "Please pick one."
+    },
+    "output": {
+      "heading": "Your install walk-through",
+      "subhead": "Follow these in order. If anything looks weird, the official install page is linked at the bottom — when in doubt, trust it over us.",
+      "copy_button": "Copy command",
+      "copied":      "✓ Copied",
+      "handoff_heading": "What's next",
+      "handoff_body": "From here, just open the tool and ask it whatever you'd ask in chat. It will pick up the conversation and teach you the rest as you go — that's the whole point. Try something concrete: \"Read the files in this folder and tell me what they do,\" or \"Help me draft a follow-up email to a customer who hasn't replied.\"",
+      "verified_stamp": "Last verified: {date}. If a command doesn't work, the official install link below is the source of truth.",
+      "official_link_label": "Official install page:",
+      "start_over_cta": "Try a different tool"
+    }
   },
 
   "footer": {

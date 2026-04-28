@@ -53,16 +53,33 @@ async function bootstrap() {
   // Try the locale-specific copy first; fall back to English (data/copy.json) on miss.
   const copyPath = lang && lang !== "en" ? `data/copy.${lang}.json` : "data/copy.json";
 
-  [services, templates, industries, countries, copy] = await Promise.all([
+  // Always load copy.json — every page hydrates from it.
+  copy = await fetchJSONWithFallback(copyPath, "data/copy.json");
+  hydrateCopy(document.body);
+
+  // Per-app bootstrap. Each top-level page sets <body data-app="...">.
+  const app = document.body.dataset.app || "personalize";
+  if      (app === "router")      await bootstrapRouter();
+  else if (app === "supercharge") await bootstrapSupercharge();
+  else                            await bootstrapPersonalize();
+}
+
+/* ===================== bootstrap: router (homepage) ===================== */
+async function bootstrapRouter() {
+  // Router is mostly static — just copy hydration, which already ran.
+  // Nothing to wire.
+}
+
+/* ===================== bootstrap: personalize (existing wizard) ===================== */
+async function bootstrapPersonalize() {
+  [services, templates, industries, countries] = await Promise.all([
     fetchJSON("data/services.json"),
     fetchJSON("data/templates.json"),
     fetchJSON("data/industries.json"),
     fetchJSON("data/countries.json"),
-    fetchJSONWithFallback(copyPath, "data/copy.json"),
   ]);
 
-  hydrateCopy(document.body);
-  renderStep1Tiles();              // tiles render into the intro section
+  renderStep1Tiles();
   renderStep2Tiles();
   renderStep3Country();
   renderStep3DetailTiles();
@@ -81,14 +98,18 @@ async function bootstrap() {
     const banner = document.getElementById("resume-banner");
     if (banner && state.goal) banner.hidden = false;
   } else {
-    // Pre-fill country from browser locale if no saved draft
     const detected = detectCountryCode();
     if (detected) state.country = detected;
   }
 
-  // Initial route: respect URL hash if present, else start at intro
   const initialScreen = screenFromHash() || "intro";
   goto(initialScreen, { replace: true });
+}
+
+/* ===================== bootstrap: supercharge (CLI walk-through) ===================== */
+async function bootstrapSupercharge() {
+  const cliTools = await fetchJSON("data/cli-tools.json");
+  initSupercharge(cliTools);
 }
 
 /* ===================== i18n + locale helpers ===================== */
@@ -1086,4 +1107,427 @@ function showFatalError() {
   section.appendChild(p);
 
   main.appendChild(section);
+}
+
+/* ===================================================================
+ * SUPERCHARGE WIZARD — separate state machine for the CLI walk-through.
+ * Independent from the personalize wizard above; doesn't touch the
+ * shared `state` variable. Persists to its own localStorage key.
+ * =================================================================== */
+
+const SC_STORAGE_KEY = "chatprep.supercharge.v1";
+const SC_SCREENS = ["intro", "cli", "os", "comfort", "output"];
+
+let scState = scFreshState();
+let scTools = null; // populated from cli-tools.json
+
+function scFreshState() {
+  return { cli: null, os: null, termComfort: null, _saved_at: null };
+}
+
+function scSaveDraft() {
+  try {
+    scState._saved_at = Date.now();
+    localStorage.setItem(SC_STORAGE_KEY, JSON.stringify(scState));
+  } catch {}
+}
+
+function scLoadDraft() {
+  try {
+    const raw = localStorage.getItem(SC_STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch { return null; }
+}
+
+function scClearDraft() {
+  try { localStorage.removeItem(SC_STORAGE_KEY); } catch {}
+}
+
+function initSupercharge(cliTools) {
+  scTools = cliTools;
+
+  // Render dynamic controls
+  scRenderCliTiles();
+  scRenderOsTiles();
+  scRenderComfortTiles();
+
+  // Wire up actions + inputs
+  document.body.addEventListener("click", e => {
+    const btn = e.target.closest("[data-action]");
+    if (!btn) return;
+    const action = btn.getAttribute("data-action");
+    if (action === "back")     scGoBack();
+    if (action === "continue") scGoNext();
+    if (action === "finish")   scGoNext(true);
+    if (action === "restart") {
+      scState = scFreshState();
+      scClearDraft();
+      scGoto("intro");
+      window.scrollTo(0, 0);
+    }
+  });
+
+  document.body.addEventListener("change", e => {
+    const t = e.target;
+    if (t.matches('input[name="cli"]'))         scState.cli = t.value;
+    if (t.matches('input[name="os"]'))          scState.os = t.value;
+    if (t.matches('input[name="termComfort"]')) scState.termComfort = t.value;
+    scSaveDraft();
+  });
+
+  // History API for back-button support (matches personalize wizard pattern)
+  window.addEventListener("popstate", e => {
+    const screen = e.state?.screen || scScreenFromHash() || "intro";
+    if (SC_SCREENS.includes(screen)) scGoto(screen, { fromPopstate: true });
+  });
+
+  const draft = scLoadDraft();
+  if (draft) scState = { ...scFreshState(), ...draft };
+
+  const initial = scScreenFromHash() || "intro";
+  scGoto(initial, { replace: true });
+}
+
+function scRenderCliTiles() {
+  const fs = document.querySelector('[data-field="cli"]');
+  if (!fs) return;
+  const opts = (copy.supercharge?.step_cli?.options) || [];
+  opts.forEach(opt => {
+    const label = document.createElement("label");
+    label.className = "cli-tile" + (opt.available ? "" : " cli-tile--disabled");
+
+    const input = document.createElement("input");
+    input.type = "radio";
+    input.name = "cli";
+    input.value = opt.id;
+    if (!opt.available) input.disabled = true;
+    label.appendChild(input);
+
+    const head = document.createElement("div");
+    head.className = "cli-tile__head";
+    const title = document.createElement("span");
+    title.className = "cli-tile__name";
+    title.textContent = opt.label;
+    head.appendChild(title);
+    const vendor = document.createElement("span");
+    vendor.className = "cli-tile__vendor";
+    vendor.textContent = "by " + opt.vendor;
+    head.appendChild(vendor);
+    label.appendChild(head);
+
+    const body = document.createElement("p");
+    body.className = "cli-tile__body";
+    body.textContent = opt.best_for;
+    label.appendChild(body);
+
+    if (!opt.available && opt.coming_soon_note) {
+      const note = document.createElement("p");
+      note.className = "cli-tile__note";
+      note.textContent = opt.coming_soon_note;
+      label.appendChild(note);
+    }
+
+    fs.appendChild(label);
+  });
+}
+
+function scRenderOsTiles() {
+  const fs = document.querySelector('[data-field="os"]');
+  if (!fs) return;
+  const opts = copy.supercharge?.step_os?.options || [];
+  opts.forEach(opt => {
+    const label = document.createElement("label");
+    label.className = "tile";
+    const input = document.createElement("input");
+    input.type = "radio";
+    input.name = "os";
+    input.value = opt.id;
+    label.appendChild(input);
+    const lbl = document.createElement("span");
+    lbl.className = "tile__label";
+    lbl.textContent = opt.label;
+    label.appendChild(lbl);
+    if (opt.hint) {
+      const h = document.createElement("span");
+      h.className = "tile__hint";
+      h.textContent = opt.hint;
+      label.appendChild(h);
+    }
+    fs.appendChild(label);
+  });
+}
+
+function scRenderComfortTiles() {
+  const fs = document.querySelector('[data-field="termComfort"]');
+  if (!fs) return;
+  const opts = copy.supercharge?.step_comfort?.options || [];
+  opts.forEach(opt => {
+    const label = document.createElement("label");
+    label.className = "tile";
+    const input = document.createElement("input");
+    input.type = "radio";
+    input.name = "termComfort";
+    input.value = opt.id;
+    label.appendChild(input);
+    const lbl = document.createElement("span");
+    lbl.className = "tile__label";
+    lbl.textContent = opt.label;
+    label.appendChild(lbl);
+    if (opt.hint) {
+      const h = document.createElement("span");
+      h.className = "tile__hint";
+      h.textContent = opt.hint;
+      label.appendChild(h);
+    }
+    fs.appendChild(label);
+  });
+}
+
+function scGoto(screen, opts = {}) {
+  const { fromPopstate = false, replace = false } = opts;
+  SC_SCREENS.forEach(s => {
+    const el = document.getElementById(`screen-${s}`);
+    if (el) el.hidden = (s !== screen);
+  });
+  scReflectStateIntoControls();
+  const heading = document.querySelector(`#screen-${screen} .screen__heading`);
+  if (heading) {
+    heading.setAttribute("tabindex", "-1");
+    heading.focus({ preventScroll: false });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+  if (screen === "output") scRenderWalkthrough();
+  if (!fromPopstate) {
+    const url = "#" + screen;
+    if (replace) history.replaceState({ screen }, "", url);
+    else         history.pushState({ screen }, "", url);
+  }
+}
+
+function scScreenFromHash() {
+  const h = (location.hash || "").replace(/^#/, "");
+  if (!h) return null;
+  return SC_SCREENS.includes(h) ? h : null;
+}
+
+function scCurrentScreen() {
+  return SC_SCREENS.find(s => !document.getElementById(`screen-${s}`).hidden) || "intro";
+}
+
+function scGoNext(isFinish = false) {
+  const here = scCurrentScreen();
+  if (!scValidateStep(here)) return;
+  const idx = SC_SCREENS.indexOf(here);
+  const next = isFinish ? "output" : SC_SCREENS[Math.min(SC_SCREENS.length - 1, idx + 1)];
+  scGoto(next);
+}
+
+function scGoBack() {
+  const here = scCurrentScreen();
+  const idx = SC_SCREENS.indexOf(here);
+  scGoto(SC_SCREENS[Math.max(0, idx - 1)]);
+}
+
+function scValidateStep(screen) {
+  scClearError(screen);
+  if (screen === "cli" && !scState.cli)             return scShowError(screen, "cli", copy.supercharge.step_cli.error_required);
+  if (screen === "os"  && !scState.os)              return scShowError(screen, "os",  copy.supercharge.step_os.error_required);
+  if (screen === "comfort" && !scState.termComfort) return scShowError(screen, "termComfort", copy.supercharge.step_comfort.error_required);
+  return true;
+}
+
+function scShowError(screen, field, msg) {
+  const node = document.querySelector(`#screen-${screen} [data-error-for="${field}"]`);
+  if (node) {
+    node.textContent = msg;
+    node.hidden = false;
+    node.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+  return false;
+}
+function scClearError(screen) {
+  document.querySelectorAll(`#screen-${screen} .error-message`).forEach(n => { n.hidden = true; });
+}
+
+function scReflectStateIntoControls() {
+  document.querySelectorAll('input[name="cli"]').forEach(r => r.checked = (r.value === scState.cli));
+  document.querySelectorAll('input[name="os"]').forEach(r => r.checked = (r.value === scState.os));
+  document.querySelectorAll('input[name="termComfort"]').forEach(r => r.checked = (r.value === scState.termComfort));
+}
+
+/* ===== Walk-through renderer ===== */
+
+function scRenderWalkthrough() {
+  const tool = scTools && scTools[scState.cli];
+  const wt = document.getElementById("walkthrough");
+  if (!wt) return;
+  while (wt.firstChild) wt.removeChild(wt.firstChild);
+
+  if (!tool) {
+    const p = document.createElement("p");
+    p.textContent = "We don't have a walk-through for that one yet — see the link below for the official install page.";
+    wt.appendChild(p);
+    return;
+  }
+
+  const showExplanations = scState.termComfort === "never";
+
+  // Tool header
+  const head = document.createElement("header");
+  head.className = "walkthrough__head";
+  const h = document.createElement("h3");
+  h.textContent = `${tool.name} on ${platformLabel(scState.os)}`;
+  head.appendChild(h);
+  if (tool.what_it_is) {
+    const intro = document.createElement("p");
+    intro.textContent = tool.what_it_is;
+    head.appendChild(intro);
+  }
+  if (tool.what_it_costs) {
+    const cost = document.createElement("p");
+    cost.className = "walkthrough__cost";
+    const costLbl = document.createElement("strong");
+    costLbl.textContent = "Cost: ";
+    cost.appendChild(costLbl);
+    cost.appendChild(document.createTextNode(tool.what_it_costs));
+    head.appendChild(cost);
+  }
+  wt.appendChild(head);
+
+  // Prereqs
+  if (tool.prereqs && tool.prereqs.items?.length) {
+    const pre = document.createElement("section");
+    pre.className = "walkthrough__prereqs";
+    const ph = document.createElement("h4");
+    ph.textContent = tool.prereqs.headline || "Before you start";
+    pre.appendChild(ph);
+    const ul = document.createElement("ul");
+    tool.prereqs.items.forEach(it => {
+      const li = document.createElement("li");
+      const strong = document.createElement("strong");
+      strong.textContent = it.label;
+      li.appendChild(strong);
+      if (it.body) {
+        li.appendChild(document.createElement("br"));
+        li.appendChild(document.createTextNode(it.body));
+      }
+      if (it.url) {
+        li.appendChild(document.createTextNode(" "));
+        const a = document.createElement("a");
+        a.href = it.url;
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+        a.textContent = "Open →";
+        li.appendChild(a);
+      }
+      ul.appendChild(li);
+    });
+    pre.appendChild(ul);
+    wt.appendChild(pre);
+  }
+
+  // Steps
+  const platformBlock = tool[scState.os];
+  if (platformBlock && platformBlock.steps) {
+    const ol = document.createElement("ol");
+    ol.className = "walkthrough__steps";
+    platformBlock.steps.forEach((step, i) => {
+      const li = document.createElement("li");
+      li.className = "step";
+
+      const stepHead = document.createElement("h4");
+      stepHead.className = "step__title";
+      stepHead.textContent = step.title;
+      li.appendChild(stepHead);
+
+      if (showExplanations && step.explain_for_beginners) {
+        const exp = document.createElement("p");
+        exp.className = "step__explain";
+        exp.textContent = step.explain_for_beginners;
+        li.appendChild(exp);
+      }
+
+      if (step.command) {
+        const block = scMakeCommandBlock(step.command);
+        li.appendChild(block);
+      }
+
+      if (step.link) {
+        const linkP = document.createElement("p");
+        const a = document.createElement("a");
+        a.href = step.link.url;
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+        a.textContent = step.link.label;
+        a.className = "step__link";
+        linkP.appendChild(a);
+        li.appendChild(linkP);
+      }
+
+      ol.appendChild(li);
+    });
+    wt.appendChild(ol);
+  }
+
+  // Official link footer
+  const linkP = document.createElement("p");
+  linkP.className = "walkthrough__official";
+  const lbl = document.createElement("strong");
+  lbl.textContent = (copy.supercharge.output.official_link_label || "Official install page:") + " ";
+  linkP.appendChild(lbl);
+  const a = document.createElement("a");
+  a.href = tool.official_url;
+  a.target = "_blank";
+  a.rel = "noopener noreferrer";
+  a.textContent = tool.official_url;
+  linkP.appendChild(a);
+  wt.appendChild(linkP);
+
+  // Verified stamp
+  const stampEl = document.getElementById("walkthrough-verified");
+  if (stampEl && copy.supercharge.output.verified_stamp) {
+    const date = scTools._last_verified || "unknown";
+    stampEl.textContent = copy.supercharge.output.verified_stamp.replace("{date}", date);
+  }
+}
+
+function scMakeCommandBlock(commandText) {
+  const wrap = document.createElement("div");
+  wrap.className = "command-block";
+
+  const pre = document.createElement("pre");
+  pre.className = "command-block__code";
+  const code = document.createElement("code");
+  code.textContent = commandText;
+  pre.appendChild(code);
+  wrap.appendChild(pre);
+
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "button button--ghost command-block__copy";
+  btn.textContent = copy.supercharge.output.copy_button || "Copy command";
+  btn.addEventListener("click", async () => {
+    const original = btn.textContent;
+    try {
+      await navigator.clipboard.writeText(commandText);
+      btn.textContent = copy.supercharge.output.copied || "✓ Copied";
+      setTimeout(() => { btn.textContent = original; }, 1800);
+    } catch {
+      // Fallback: select the text so user can copy manually
+      const range = document.createRange();
+      range.selectNodeContents(code);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+      btn.textContent = "Selected — press ⌘C";
+    }
+  });
+  wrap.appendChild(btn);
+
+  return wrap;
+}
+
+function platformLabel(osCode) {
+  return ({ mac: "Mac", win: "Windows", lin: "Linux" })[osCode] || osCode;
 }

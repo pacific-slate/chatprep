@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A friendly walk-through to install Claude Code, Gemini CLI, or Codex on your computer — the AI tools that can read your files, do research, and remember what you're working on. No coding experience required.">
+  <meta name="color-scheme" content="light dark">
+  <title>Supercharge your AI — ChatPrep</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body data-app="supercharge">
+
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <header class="site-header">
+    <a href="/" class="site-title" aria-label="ChatPrep home">
+      <span class="site-title__mark" aria-hidden="true">▣</span>
+      <span class="site-title__text">ChatPrep</span>
+    </a>
+    <p class="site-tagline" data-copy="site.footer_privacy">Nothing you type leaves your browser. No accounts. No tracking.</p>
+  </header>
+
+  <main id="main" class="wizard wizard--narrow">
+
+    <!-- INTRO: short explainer of what the supercharge path is -->
+    <section id="screen-intro" class="screen" aria-labelledby="sc-intro-heading">
+      <h1 id="sc-intro-heading" class="screen__heading" data-copy="supercharge.intro.heading"></h1>
+      <p class="screen__subhead" data-copy="supercharge.intro.subhead"></p>
+
+      <details class="details" open>
+        <summary data-copy="supercharge.intro.what_is_a_cli_heading"></summary>
+        <p data-copy="supercharge.intro.what_is_a_cli_body"></p>
+      </details>
+
+      <details class="details">
+        <summary data-copy="supercharge.intro.scary_heading"></summary>
+        <p data-copy="supercharge.intro.scary_body"></p>
+      </details>
+
+      <nav class="step-nav step-nav--end">
+        <button type="button" class="button button--primary" data-action="continue" data-copy="supercharge.intro.cta"></button>
+      </nav>
+    </section>
+
+    <!-- STEP CLI: pick a tool -->
+    <section id="screen-cli" class="screen" aria-labelledby="sc-cli-heading" hidden>
+      <p class="step-label" data-copy="nav.step_label" data-step-n="1" data-step-total="3"></p>
+      <h2 id="sc-cli-heading" class="screen__heading" data-copy="supercharge.step_cli.heading"></h2>
+      <p class="screen__subhead" data-copy="supercharge.step_cli.subhead"></p>
+
+      <fieldset class="cli-tile-group" data-field="cli" data-required="true">
+        <legend class="visually-hidden" data-copy="supercharge.step_cli.heading"></legend>
+        <!-- tiles rendered by JS -->
+      </fieldset>
+
+      <p class="error-message" data-error-for="cli" hidden></p>
+
+      <nav class="step-nav">
+        <button type="button" class="button button--ghost" data-action="back" data-copy="nav.back">Back</button>
+        <button type="button" class="button button--primary" data-action="continue" data-copy="nav.continue">Continue</button>
+      </nav>
+    </section>
+
+    <!-- STEP OS: pick OS -->
+    <section id="screen-os" class="screen" aria-labelledby="sc-os-heading" hidden>
+      <p class="step-label" data-copy="nav.step_label" data-step-n="2" data-step-total="3"></p>
+      <h2 id="sc-os-heading" class="screen__heading" data-copy="supercharge.step_os.heading"></h2>
+      <p class="screen__subhead" data-copy="supercharge.step_os.subhead"></p>
+
+      <fieldset class="tile-group" data-field="os" data-required="true">
+        <legend class="visually-hidden" data-copy="supercharge.step_os.heading"></legend>
+      </fieldset>
+
+      <p class="error-message" data-error-for="os" hidden></p>
+
+      <nav class="step-nav">
+        <button type="button" class="button button--ghost" data-action="back" data-copy="nav.back">Back</button>
+        <button type="button" class="button button--primary" data-action="continue" data-copy="nav.continue">Continue</button>
+      </nav>
+    </section>
+
+    <!-- STEP COMFORT: comfort with terminal -->
+    <section id="screen-comfort" class="screen" aria-labelledby="sc-comfort-heading" hidden>
+      <p class="step-label" data-copy="nav.step_label" data-step-n="3" data-step-total="3"></p>
+      <h2 id="sc-comfort-heading" class="screen__heading" data-copy="supercharge.step_comfort.heading"></h2>
+      <p class="screen__subhead" data-copy="supercharge.step_comfort.subhead"></p>
+
+      <fieldset class="tile-group" data-field="termComfort" data-required="true">
+        <legend class="visually-hidden" data-copy="supercharge.step_comfort.heading"></legend>
+      </fieldset>
+
+      <p class="error-message" data-error-for="termComfort" hidden></p>
+
+      <nav class="step-nav">
+        <button type="button" class="button button--ghost" data-action="back" data-copy="nav.back">Back</button>
+        <button type="button" class="button button--primary" data-action="finish" data-copy="nav.continue">Show me the steps</button>
+      </nav>
+    </section>
+
+    <!-- OUTPUT: the personalized walk-through -->
+    <section id="screen-output" class="screen screen--output" aria-labelledby="sc-output-heading" hidden>
+      <h2 id="sc-output-heading" class="screen__heading" data-copy="supercharge.output.heading"></h2>
+      <p class="screen__subhead" data-copy="supercharge.output.subhead"></p>
+
+      <article id="walkthrough" class="walkthrough">
+        <!-- rendered by JS based on state.cli + state.os + state.termComfort -->
+      </article>
+
+      <section class="handoff">
+        <h3 data-copy="supercharge.output.handoff_heading"></h3>
+        <p data-copy="supercharge.output.handoff_body"></p>
+      </section>
+
+      <p class="walkthrough__verified" id="walkthrough-verified"></p>
+
+      <nav class="step-nav step-nav--end">
+        <button type="button" class="button button--ghost" data-action="restart" data-copy="supercharge.output.start_over_cta"></button>
+      </nav>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <p class="site-footer__line" data-copy="footer.made_by">Made by a person, not a company.</p>
+    <ul class="site-footer__links">
+      <li><a href="/about" data-copy="footer.about">About</a></li>
+      <li><a href="/privacy" data-copy="footer.privacy">Privacy</a></li>
+      <li><a href="https://github.com/pacific-slate/chatprep" rel="noopener" data-copy="footer.github">View source on GitHub</a></li>
+    </ul>
+  </footer>
+
+  <script src="app.js" type="module"></script>
+</body>
+</html>
