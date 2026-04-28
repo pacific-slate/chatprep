@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="ChatPrep's privacy promise: nothing you type leaves your browser. No accounts. No tracking. No analytics.">
+  <meta name="color-scheme" content="light dark">
+  <title>Privacy — ChatPrep</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <header class="site-header">
+    <a href="/" class="site-title" aria-label="ChatPrep home">
+      <span class="site-title__mark" aria-hidden="true">▣</span>
+      <span class="site-title__text">ChatPrep</span>
+    </a>
+    <p class="site-tagline">Nothing you type leaves your browser. No accounts. No tracking.</p>
+  </header>
+
+  <main id="main" class="wizard">
+
+    <article class="screen">
+
+      <h1 class="screen__heading">Privacy</h1>
+
+      <p class="screen__subhead">In one line: nothing you type into ChatPrep is sent anywhere. Not even to us. Not even to count visitors.</p>
+
+      <h2>What we don't do</h2>
+
+      <ul class="reassurance">
+        <li><span class="reassurance__check" aria-hidden="true">✓</span> We don't have user accounts. There's nothing to sign up for.</li>
+        <li><span class="reassurance__check" aria-hidden="true">✓</span> We don't have a server that processes your answers — the wizard runs entirely in your browser.</li>
+        <li><span class="reassurance__check" aria-hidden="true">✓</span> We don't use Google Analytics, Facebook Pixel, or any other tracking script.</li>
+        <li><span class="reassurance__check" aria-hidden="true">✓</span> We don't set any cookies. (You won't see a "cookie banner" because there are no cookies to disclose.)</li>
+        <li><span class="reassurance__check" aria-hidden="true">✓</span> We don't sell, share, or have access to your data — we don't have it in the first place.</li>
+      </ul>
+
+      <h2>What does happen</h2>
+      <p>When you visit chatprep.org, your browser downloads the website's files (HTML, CSS, JavaScript, and a few JSON data files) from Cloudflare's servers. Cloudflare delivers these files. That's it.</p>
+
+      <p>Your browser saves your answers to <strong>your own computer</strong>, in a feature called <em>localStorage</em>. This is so you can close the tab, come back tomorrow, and pick up where you left off. The data stays on your computer. It's not visible to us, to Cloudflare, or to anyone else. You can clear it any time by clicking "Start over" in the wizard, or by clearing your browser's site data for chatprep.org.</p>
+
+      <h2>How to verify any of this</h2>
+      <p>Three ways to confirm we're telling the truth:</p>
+
+      <ol>
+        <li><strong>Read the source.</strong> Right-click any page → <em>View Page Source</em>. You'll see plain HTML and a few small JavaScript files. No analytics scripts, no tracking pixels, no fetch calls to anywhere except the data files in <code>/data/</code> on this same site.</li>
+
+        <li><strong>Watch the network tab.</strong> Open your browser's developer tools (right-click → Inspect → Network). Refresh the page and run through the wizard. You'll see the initial files download, and then nothing — no further requests as you answer questions or generate templates.</li>
+
+        <li><strong>Pull the plug.</strong> After the page has loaded, turn off your Wi-Fi or unplug your ethernet cable. The wizard still works. Answer the questions, generate the templates, copy the output. None of it requires the internet because none of it is sent anywhere.</li>
+      </ol>
+
+      <h2>Cloudflare's role</h2>
+      <p>Cloudflare hosts the website and routes traffic. They will see your IP address and the URL you requested, like any web server does. Cloudflare's privacy practices are described in their <a href="https://www.cloudflare.com/privacypolicy/" rel="noopener">privacy policy</a>. We don't have access to any of those server logs.</p>
+
+      <h2>Links to other sites</h2>
+      <p>The output you generate includes links to ChatGPT, Claude, and Gemini's official settings pages. When you click those, you leave ChatPrep. Each of those services has its own privacy policy that applies once you arrive there. We have no relationship with any of them.</p>
+
+      <h2>If we ever change this</h2>
+      <p>If ChatPrep ever changes the privacy posture, the change will be commit-by-commit visible in <a href="https://github.com/pacific-slate/chatprep" rel="noopener">the open source repo</a>. We commit to never adding tracking, analytics, or accounts to the wizard.</p>
+
+      <h2>Children</h2>
+      <p>If you're under 13, please ask a grown-up before using AI services. Most of them require users to be at least 13 in their terms of service. ChatPrep itself collects nothing, but the AI services you'll paste into may have age requirements.</p>
+
+      <h2>Questions</h2>
+      <p>The fastest way to ask is to <a href="https://github.com/pacific-slate/chatprep/issues" rel="noopener">open an issue on GitHub</a>. Or read the <a href="/about.html">about page</a>.</p>
+
+      <p class="reassurance" style="margin-top: 3rem;"><a href="/" class="button button--primary">Back to the wizard</a></p>
+
+    </article>
+
+  </main>
+
+  <footer class="site-footer">
+    <p class="site-footer__line">Made by a person, not a company.</p>
+    <ul class="site-footer__links">
+      <li><a href="/about.html">About</a></li>
+      <li><a href="/privacy.html">Privacy</a></li>
+      <li><a href="https://github.com/pacific-slate/chatprep" rel="noopener">View source on GitHub</a></li>
+    </ul>
+  </footer>
+
+</body>
+</html>

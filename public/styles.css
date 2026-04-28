@@ -561,3 +561,34 @@ h2.screen__heading { font-size: var(--text-h2); }
   max-width: var(--max-readable);
   border-radius: var(--radius-md);
 }
+
+/* ============ 12. ARTICLE PAGES (about, privacy) ============ */
+.screen article, article.screen {
+  font-size: var(--text-base);
+}
+.screen h2 {
+  font-size: 1.4rem;
+  margin: var(--gap-lg) 0 var(--gap-xs);
+  line-height: var(--line-tight);
+}
+.screen h2:first-of-type { margin-top: var(--gap-md); }
+.screen p {
+  margin: 0 0 var(--gap-sm);
+  max-width: var(--max-readable);
+  color: var(--text);
+}
+.screen ul, .screen ol {
+  margin: var(--gap-sm) 0;
+  padding-left: 1.4rem;
+  max-width: var(--max-readable);
+}
+.screen ul.reassurance { padding-left: 0; }
+.screen li { margin-bottom: var(--gap-xs); }
+.screen code {
+  font-family: var(--font-mono);
+  font-size: 0.95em;
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+}
+.screen strong { color: var(--text); }
