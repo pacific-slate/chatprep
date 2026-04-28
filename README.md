@@ -16,7 +16,7 @@ This is a vanilla HTML/CSS/JS site with no build step.
 
 ```sh
 cd chatprep
-python3 -m http.server 8000
+python3 -m http.server -d public 8000
 ```
 
 Then open <http://localhost:8000>.
@@ -25,17 +25,22 @@ Then open <http://localhost:8000>.
 
 ```
 chatprep/
-├── index.html       # single-page wizard UI
-├── styles.css       # vanilla CSS, custom properties, mobile-first
-├── app.js           # ES module, no bundler
-├── templates.json   # service templates as data
-├── SPEC.md          # wizard contract (questions, outputs, behavior)
+├── public/              # deployable static site (uploaded to Cloudflare)
+│   ├── index.html       # single-page wizard UI
+│   ├── styles.css       # vanilla CSS, custom properties, mobile-first
+│   ├── app.js           # ES module, no bundler
+│   └── templates.json   # service templates as data
+├── SPEC.md              # wizard contract (questions, outputs, behavior)
+├── wrangler.jsonc       # Cloudflare Workers static-assets config
+├── LICENSE              # MIT
 └── README.md
 ```
 
 ## Deploy
 
-Push to `main` → Cloudflare Pages auto-deploys to <https://chatprep.org>.
+Push to `main` → Cloudflare Workers (Static Assets) auto-deploys to <https://chatprep.org>.
+
+The Cloudflare project runs `npx wrangler deploy` on each push, which uploads `./public/` as static assets per [`wrangler.jsonc`](wrangler.jsonc).
 
 ## License
 
