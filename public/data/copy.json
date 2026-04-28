@@ -1,6 +1,7 @@
 {
   "_comment": "All user-facing strings. Voice: gentle, plain English, never condescending. Reading age ~8th grade. No jargon (avoid 'system prompt', 'context window', 'fine-tune'). Reassuring without being saccharine. When in doubt, write it the way you'd say it to your aunt.",
-  "_version": "0.0.2",
+  "_version": "0.1.0",
+  "_locale": "en",
   "_last_verified": "2026-04-27",
 
   "site": {
@@ -12,7 +13,7 @@
   "intro": {
     "heading": "Set up AI to work the way you think.",
     "subhead": "A free, friendly walk-through. We'll ask you a few simple questions, then give you something you can paste into ChatGPT, Claude, or Gemini to make it work better for you.",
-    "reassurance_1": "It takes about 3 minutes.",
+    "reassurance_1": "It takes about 2 minutes.",
     "reassurance_2": "You don't need to make an account. There's nothing to install.",
     "reassurance_3": "Nothing you type here is sent anywhere — not even to us.",
     "cta_start": "Let's begin",
@@ -29,7 +30,7 @@
 
   "step1": {
     "heading": "What do you mostly want AI to help with?",
-    "subhead": "Pick the one that fits best. You can choose more later.",
+    "subhead": "Pick the one that fits best. You can change it later.",
     "options": [
       { "id": "writing",  "label": "Writing",      "hint": "Emails, essays, reports — anything with words." },
       { "id": "learning", "label": "Learning",     "hint": "Studying, understanding new topics, getting tutored." },
@@ -53,32 +54,28 @@
   },
 
   "step3": {
-    "heading": "Which AI services do you have access to?",
-    "subhead": "Check any that apply. If you're not sure, that's fine — pick \"I don't know\" and we'll suggest one.",
-    "options": [
-      { "id": "chatgpt_free",  "label": "ChatGPT (free)" },
-      { "id": "chatgpt_plus",  "label": "ChatGPT Plus or Pro (paid)" },
-      { "id": "claude",        "label": "Claude" },
-      { "id": "gemini",        "label": "Gemini (Google)" },
-      { "id": "copilot_work",  "label": "Microsoft Copilot at work" },
-      { "id": "unsure",        "label": "I'm not sure" }
-    ],
-    "error_required": "Please check at least one — even \"I'm not sure\" is fine."
-  },
-
-  "step4": {
     "heading": "A little about you",
-    "subhead": "This helps the AI talk to you in a way that fits your life. We don't ask for your name, address, or anything that could identify you. Keep it general — \"a teacher in California\" is plenty.",
-    "industry_label": "What kind of work do you do?",
-    "industry_placeholder": "Type to search — e.g. healthcare, education, retail",
-    "industry_other": "Something else",
-    "role_label": "What's your role?",
-    "role_placeholder": "e.g. teacher, manager, student, retired",
+    "subhead": "Helps the AI talk to you in a way that fits your life. We don't ask for your name, employer, or anything that could identify you. Tap a suggestion below any field, or type your own. Skip any field you'd rather not answer.",
+
     "country_label": "Where are you?",
-    "country_placeholder": "Country",
+    "country_why": "So measurements, dates, and references make sense for your country — recipes in cups vs grams, dates as MM/DD vs DD/MM, that kind of thing.",
+    "country_placeholder": "Choose a country",
+
+    "industry_label": "What kind of work do you do?",
+    "industry_why": "Tells the AI what world you're in, so it can use examples and language that fit. \"Healthcare\" or \"retired\" is enough — no need for company names.",
+    "industry_placeholder": "Pick or type — e.g. healthcare, education, retail",
+    "industry_chips": ["Healthcare", "Education", "Tech", "Retail", "Self-employed", "Student", "Retired"],
+
+    "role_label": "What's your role?",
+    "role_why": "Helps the AI understand what's important to you. Plain words like \"teacher,\" \"parent,\" \"manager,\" \"engineer.\"",
+    "role_placeholder": "Pick or type — e.g. teacher, manager, parent",
+    "role_chips": ["Manager", "Teacher", "Student", "Retired", "Parent", "Engineer", "Owner"],
+
     "hobbies_label": "Hobbies or interests (optional)",
+    "hobbies_why": "If you mention these, the AI can use them in examples — explaining math through cooking, writing tips through your favorite books, etc. Tap a chip to add; tap again to remove.",
     "hobbies_placeholder": "e.g. cooking, hiking, reading, woodworking",
-    "hobbies_hint": "If you mention these, the AI can use them to explain things in ways that click for you.",
+    "hobbies_chips": ["Cooking", "Reading", "Gardening", "Music", "Sports", "Travel", "Crafts", "Photography"],
+
     "detail_label": "How much detail do you want the AI to know about you?",
     "detail_options": [
       { "id": "minimal",  "label": "Just the basics", "hint": "Quick and private." },
@@ -87,7 +84,7 @@
     ]
   },
 
-  "step5": {
+  "step4": {
     "heading": "Anything you want the AI to avoid?",
     "subhead": "Pet peeves, things that bug you, or just preferences. Skip if you don't have any.",
     "options": [
@@ -105,7 +102,7 @@
 
   "output": {
     "heading": "Here's what to paste.",
-    "subhead": "We've made three versions — one for each service. Same idea, just formatted to fit each one's quirks. Pick the tab for the AI you use, hit Copy, and paste it into the right spot.",
+    "subhead": "We've made three versions — one for each of the big AI services. Pick the tab for the one you use, hit Copy, and paste it into the right spot. (Don't use any of these yet? See the \"Why three formats?\" note below.)",
     "tabs": {
       "chatgpt": "ChatGPT",
       "claude":  "Claude",
@@ -118,7 +115,7 @@
     "char_warning":         "We trimmed a few optional bits to fit. The most important parts are still there.",
     "verified_stamp":       "Last verified: {date}. AI services change — check our notes if something looks off.",
     "why_three_heading":    "Why three different formats?",
-    "why_three_body":       "Each service has its own quirks: ChatGPT splits your instructions into two boxes; Claude takes one long block; Gemini has a strict length limit. Same instructions underneath — just packaged differently.",
+    "why_three_body":       "Each service has its own quirks: ChatGPT splits your instructions into two boxes; Claude takes one long block; Gemini has a strict length limit. Same instructions underneath — just packaged differently. If you don't use any of these yet, ChatGPT is the easiest to start with — it has a free version at chatgpt.com.",
     "start_over_cta":       "Start over with different answers"
   },
 

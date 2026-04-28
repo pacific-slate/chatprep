@@ -3,13 +3,15 @@
  * Vanilla ES module. No build step. No framework. No bundler.
  *
  * Responsibilities:
- *   - Load JSON data (copy, services, templates, industries)
+ *   - Load JSON data (copy, services, templates, industries, countries)
  *   - Hydrate DOM from copy.json (data-copy + data-copy-attr)
- *   - Render dynamic step controls (tiles, checkboxes, datalist)
- *   - Run the wizard state machine (intro → step1..5 → output)
+ *   - Render dynamic step controls (tiles, checkboxes, chips, country dropdown)
+ *   - Run the wizard state machine (intro → step1..4 → output)
  *   - Persist answers in localStorage
  *   - Derive canonical template + adapt per service
  *   - Wire copy-to-clipboard
+ *   - Light i18n scaffold: ?lang=xx or navigator.language → data/copy.<lang>.json
+ *     with fallback to English. Country dropdown also pre-fills from locale.
  *
  * Posture: be tolerant of missing/odd data. If something's wrong,
  * show plain-English fallback rather than crashing the wizard.
@@ -21,12 +23,12 @@
 
 "use strict";
 
-const STORAGE_KEY = "chatprep.draft.v1";
+const STORAGE_KEY = "chatprep.draft.v2";
 const STORAGE_TTL_DAYS = 30;
-const SCREENS = ["intro", "step1", "step2", "step3", "step4", "step5", "output"];
-const ORDER   = ["intro", "step1", "step2", "step3", "step4", "step5", "output"];
+const SCREENS = ["intro", "step1", "step2", "step3", "step4", "output"];
+const ORDER   = ["intro", "step1", "step2", "step3", "step4", "output"];
 
-let copy, services, templates, industries;
+let copy, services, templates, industries, countries;
 let state = freshState();
 
 /* ===================== bootstrap ===================== */
@@ -39,20 +41,25 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 async function bootstrap() {
-  [copy, services, templates, industries] = await Promise.all([
-    fetchJSON("data/copy.json"),
+  const lang = pickLanguage();
+  // Try the locale-specific copy first; fall back to English (data/copy.json) on miss.
+  const copyPath = lang && lang !== "en" ? `data/copy.${lang}.json` : "data/copy.json";
+
+  [services, templates, industries, countries, copy] = await Promise.all([
     fetchJSON("data/services.json"),
     fetchJSON("data/templates.json"),
     fetchJSON("data/industries.json"),
+    fetchJSON("data/countries.json"),
+    fetchJSONWithFallback(copyPath, "data/copy.json"),
   ]);
 
   hydrateCopy(document.body);
   renderStep1Tiles();
   renderStep2Tiles();
-  renderStep3Checkboxes();
-  renderStep4Industries();
-  renderStep4DetailTiles();
-  renderStep5Checkboxes();
+  renderStep3Country();
+  renderStep3DetailTiles();
+  renderAllChips();
+  renderStep4Checkboxes();
   wireActions();
   wireFieldInputs();
   wireTabs();
@@ -61,9 +68,40 @@ async function bootstrap() {
   if (draft) {
     state = { ...freshState(), ...draft };
     document.querySelector('[data-action="resume"]')?.removeAttribute("hidden");
+  } else {
+    // Pre-fill country from browser locale if no saved draft
+    const detected = detectCountryCode();
+    if (detected) state.country = detected;
   }
 
   goto("intro");
+}
+
+/* ===================== i18n + locale helpers ===================== */
+
+function pickLanguage() {
+  // 1. ?lang= query string wins
+  const q = new URLSearchParams(location.search).get("lang");
+  if (q) return q.toLowerCase().slice(0, 5);
+  // 2. browser language
+  const navLang = (navigator.language || "en").toLowerCase();
+  return navLang.slice(0, 2); // "en", "es", "fr", etc.
+}
+
+function detectCountryCode() {
+  // navigator.language formats: "en-US", "es-MX", "fr-FR" — extract the country code.
+  // For users with bare languages like "en" or "fr", returns null.
+  const lang = navigator.language || "";
+  const m = lang.match(/-([A-Z]{2})$/i);
+  return m ? m[1].toUpperCase() : null;
+}
+
+async function fetchJSONWithFallback(primary, fallback) {
+  try {
+    const r = await fetch(primary);
+    if (r.ok) return await r.json();
+  } catch {}
+  return fetchJSON(fallback);
 }
 
 /* ===================== state ===================== */
@@ -72,10 +110,9 @@ function freshState() {
   return {
     goal: null,
     comfort: null,
-    services: [],
     industry: "",
     role: "",
-    country: "",
+    country: "",     // ISO 3166 alpha-2 code (e.g. "US"), or "" if unset
     hobbies: "",
     detail: "standard",
     avoid: [],
@@ -151,29 +188,75 @@ function renderStep1Tiles() {
   const fs = document.querySelector('[data-field="goal"]');
   fs.appendChild(buildTiles(copy.step1.options, "goal", "radio"));
 }
+
 function renderStep2Tiles() {
   const fs = document.querySelector('[data-field="comfort"]');
   fs.appendChild(buildTiles(copy.step2.options, "comfort", "radio"));
 }
-function renderStep3Checkboxes() {
-  const fs = document.querySelector('[data-field="services"]');
-  fs.appendChild(buildCheckboxRows(copy.step3.options, "services"));
-}
-function renderStep4Industries() {
-  const dl = document.getElementById("list-industries");
-  industries.industries.forEach(name => {
+
+function renderStep3Country() {
+  const sel = document.getElementById("field-country");
+  countries.countries.forEach(c => {
     const opt = document.createElement("option");
-    opt.value = name;
-    dl.appendChild(opt);
+    opt.value = c.code;
+    opt.textContent = c.name;
+    sel.appendChild(opt);
   });
 }
-function renderStep4DetailTiles() {
+
+function renderStep3DetailTiles() {
   const fs = document.querySelector('[data-field="detail"]');
-  fs.appendChild(buildTiles(copy.step4.detail_options, "detail", "radio"));
+  fs.appendChild(buildTiles(copy.step3.detail_options, "detail", "radio"));
 }
-function renderStep5Checkboxes() {
+
+function renderStep4Checkboxes() {
   const fs = document.querySelector('[data-field="avoid"]');
-  fs.appendChild(buildCheckboxRows(copy.step5.options, "avoid"));
+  fs.appendChild(buildCheckboxRows(copy.step4.options, "avoid"));
+}
+
+function renderAllChips() {
+  document.querySelectorAll("[data-chips-for]").forEach(container => {
+    const field = container.getAttribute("data-chips-for");
+    const sourcePath = container.getAttribute("data-chips-source");
+    const mode = container.getAttribute("data-chips-mode") || "replace";
+    const list = getCopy(sourcePath) || [];
+    list.forEach(label => {
+      const chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "chip";
+      chip.textContent = label;
+      chip.dataset.value = label;
+      chip.addEventListener("click", () => onChipClick(field, label, mode, chip));
+      container.appendChild(chip);
+    });
+  });
+}
+
+function onChipClick(field, value, mode, chipEl) {
+  const input = document.querySelector(`[data-field="${field}"]`);
+  if (!input) return;
+
+  if (mode === "append") {
+    // For hobbies-style multi-add: toggle the chip's value in the comma-separated input
+    const current = input.value.split(",").map(s => s.trim()).filter(Boolean);
+    const idx = current.findIndex(v => v.toLowerCase() === value.toLowerCase());
+    if (idx >= 0) {
+      current.splice(idx, 1);
+      chipEl.classList.remove("chip--selected");
+    } else {
+      current.push(value);
+      chipEl.classList.add("chip--selected");
+    }
+    input.value = current.join(", ");
+  } else {
+    // Replace mode (industry, role): set the value, mark this chip selected, unmark siblings
+    input.value = value;
+    chipEl.parentElement.querySelectorAll(".chip").forEach(c => c.classList.remove("chip--selected"));
+    chipEl.classList.add("chip--selected");
+  }
+
+  state[field] = input.value;
+  saveDraft();
 }
 
 function buildTiles(options, name, type) {
@@ -251,12 +334,12 @@ function wireActions() {
 }
 
 const ACTIONS = {
-  start:    () => { state = freshState(); clearDraft(); goto("step1"); },
+  start:    () => { state = freshState(); clearDraft(); const d = detectCountryCode(); if (d) state.country = d; goto("step1"); },
   resume:   () => { goto(currentStepFromState() || "step1"); },
   back:     () => goBack(),
   continue: () => goNext(),
   finish:   () => goNext(true),
-  restart:  () => { state = freshState(); clearDraft(); goto("intro"); window.scrollTo(0, 0); },
+  restart:  () => { state = freshState(); clearDraft(); const d = detectCountryCode(); if (d) state.country = d; goto("intro"); window.scrollTo(0, 0); },
 };
 
 function wireFieldInputs() {
@@ -265,15 +348,15 @@ function wireFieldInputs() {
     if (t.matches('input[name="goal"]'))     state.goal = t.value;
     if (t.matches('input[name="comfort"]'))  state.comfort = t.value;
     if (t.matches('input[name="detail"]'))   state.detail = t.value;
-    if (t.matches('input[name="services"]')) state.services = collectChecked("services");
-    if (t.matches('input[name="avoid"]'))    state.avoid    = collectChecked("avoid");
+    if (t.matches('input[name="avoid"]'))    state.avoid = collectChecked("avoid");
+    if (t.matches('select[data-field="country"]')) state.country = t.value;
     saveDraft();
   });
   document.body.addEventListener("input", e => {
     const t = e.target;
     if (!t.dataset.field) return;
     const f = t.dataset.field;
-    if (["industry","role","country","hobbies","avoid_other"].includes(f)) {
+    if (["industry","role","hobbies","avoid_other"].includes(f)) {
       state[f] = t.value;
       saveDraft();
     }
@@ -308,9 +391,8 @@ function currentScreen() {
 function currentStepFromState() {
   if (!state.goal) return "step1";
   if (!state.comfort) return "step2";
-  if (state.services.length === 0) return "step3";
-  if (!state.industry && !state.role && !state.country) return "step4";
-  return "step5";
+  if (!state.country && !state.industry && !state.role) return "step3";
+  return "step4";
 }
 
 function goNext(isFinish = false) {
@@ -330,12 +412,10 @@ function goBack() {
 
 function validateStep(screen) {
   clearError(screen);
-  if (screen === "step1" && !state.goal)
-    return showError("step1", "goal", copy.step1.error_required);
-  if (screen === "step2" && !state.comfort)
-    return showError("step2", "comfort", copy.step2.error_required);
-  if (screen === "step3" && state.services.length === 0)
-    return showError("step3", "services", copy.step3.error_required);
+  if (screen === "step1" && !state.goal)    return showError("step1", "goal", copy.step1.error_required);
+  if (screen === "step2" && !state.comfort) return showError("step2", "comfort", copy.step2.error_required);
+  // step3 fields are all optional — gentle posture
+  // step4 fully optional
   return true;
 }
 
@@ -356,14 +436,18 @@ function reflectStateIntoControls() {
   setRadio("goal", state.goal);
   setRadio("comfort", state.comfort);
   setRadio("detail", state.detail);
-  setChecks("services", state.services);
   setChecks("avoid", state.avoid);
   setText("industry", state.industry);
   setText("role", state.role);
-  setText("country", state.country);
   setText("hobbies", state.hobbies);
   setText("avoid_other", state.avoid_other);
+  setSelect("country", state.country);
+  // Reflect chip selection state when re-entering a screen
+  syncChipSelection("hobbies", "append");
+  syncChipSelection("industry", "replace");
+  syncChipSelection("role", "replace");
 }
+
 function setRadio(name, value) {
   document.querySelectorAll(`input[name="${name}"]`).forEach(r => r.checked = (r.value === value));
 }
@@ -373,7 +457,28 @@ function setChecks(name, values) {
 }
 function setText(field, value) {
   const el = document.querySelector(`[data-field="${field}"]`);
-  if (el && el.tagName !== "FIELDSET") el.value = value || "";
+  if (el && el.tagName !== "FIELDSET" && el.tagName !== "SELECT") el.value = value || "";
+}
+function setSelect(field, value) {
+  const el = document.querySelector(`select[data-field="${field}"]`);
+  if (el) el.value = value || "";
+}
+
+function syncChipSelection(field, mode) {
+  const container = document.querySelector(`[data-chips-for="${field}"]`);
+  if (!container) return;
+  const input = document.querySelector(`[data-field="${field}"]`);
+  const value = input?.value || "";
+  if (mode === "append") {
+    const tokens = value.split(",").map(s => s.trim().toLowerCase()).filter(Boolean);
+    container.querySelectorAll(".chip").forEach(c => {
+      c.classList.toggle("chip--selected", tokens.includes(c.dataset.value.toLowerCase()));
+    });
+  } else {
+    container.querySelectorAll(".chip").forEach(c => {
+      c.classList.toggle("chip--selected", c.dataset.value.toLowerCase() === value.toLowerCase());
+    });
+  }
 }
 
 /* ===================== template derivation ===================== */
@@ -382,14 +487,16 @@ function deriveCanonical() {
   const t = templates;
   const role     = state.role.trim()     || "person";
   const industry = state.industry.trim() || "general work";
-  const country  = state.country.trim()  || "the United States";
+
+  // Map ISO country code → English name for the template
+  const countryName = countryNameFromCode(state.country) || "an unspecified country";
 
   const goalsLine    = t.goals_by_q1[state.goal] || "Help me think more clearly.";
   const toneCfg      = t.tone_by_comfort[state.comfort] || t.tone_by_comfort.casual;
   const formatLine   = t.format_by_q1[state.goal] || "Mix prose with bullets where helpful.";
   const lengthLine   = t.length_by_detail[state.detail] || t.length_by_detail.standard;
 
-  const aboutMe = fmt(t.skeleton.about_me, { role, industry, country });
+  const aboutMe = fmt(t.skeleton.about_me, { role, industry, country: countryName });
 
   const alwaysList = [];
   if (state.avoid.includes("cite_sources"))  alwaysList.push(t.always_rules.cite_sources);
@@ -420,6 +527,12 @@ function deriveCanonical() {
     avoid:        avoidList,
     fallback:     t.skeleton.fallback,
   };
+}
+
+function countryNameFromCode(code) {
+  if (!code) return null;
+  const found = countries.countries.find(c => c.code === code);
+  return found ? found.name : null;
 }
 
 function adaptForChatGPT(c) {
@@ -491,7 +604,6 @@ function adaptForGemini(c) {
   if (full.length <= limit) return { text: full, trimmed: false };
 
   let txt = full;
-  // Drop optional sections to fit.
   txt = txt.replace(/Hobbies:.*\n/g, "");
   if (txt.length > limit) txt = txt.replace(c.fallback, "").trimEnd();
   if (txt.length > limit) txt = txt.slice(0, limit - 1) + "…";

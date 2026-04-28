@@ -415,6 +415,75 @@ h2.screen__heading { font-size: var(--text-h2); }
   font-size: var(--text-small);
 }
 
+/* Per-field "why we ask" microcopy — sits between label and input */
+.form-why {
+  margin: 0 0 var(--gap-xs);
+  color: var(--muted);
+  font-size: var(--text-small);
+  line-height: 1.45;
+  max-width: var(--max-form);
+}
+
+/* Native select with consistent styling */
+.form-input--select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+                    linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+  background-position: calc(100% - 18px) 50%, calc(100% - 12px) 50%;
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+  padding-right: 2.5rem;
+  cursor: pointer;
+}
+.form-input--select:focus-visible {
+  border-color: var(--accent);
+}
+
+/* Suggestion chips below text fields */
+.chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0.6rem 0 0;
+  max-width: var(--max-form);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0.35rem 0.85rem;
+  font-size: var(--text-small);
+  font-weight: 500;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background-color 100ms, border-color 100ms, color 100ms;
+  line-height: 1.2;
+}
+.chip:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.chip:active { transform: scale(0.97); }
+.chip--selected {
+  background: var(--accent);
+  color: var(--accent-text);
+  border-color: var(--accent);
+}
+.chip--selected:hover {
+  background: var(--accent-hover);
+  color: var(--accent-text);
+  border-color: var(--accent-hover);
+}
+.chip:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
 /* ============ 10. TABS + TAB PANELS ============ */
 .tabs {
   display: flex;
