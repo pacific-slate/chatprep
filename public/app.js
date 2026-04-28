@@ -545,18 +545,28 @@ function countryNameFromCode(code) {
 function adaptForChatGPT(c) {
   // Source: OpenAI GPT-4.1 Prompting Guide (openai-cookbook/examples/gpt4-1_prompting_guide.ipynb)
   // Recommended structure: markdown headers — # Role and Objective, # Instructions, # Output Format
-  // Custom Instructions UI splits into two boxes; we map the structure across.
+  //
+  // UI verified live 2026-04-27: ChatGPT has CONSOLIDATED its Custom Instructions
+  // panel. The two-box pattern ("What would you like ChatGPT to know about you?"
+  // + "How would you like ChatGPT to respond?") is GONE. The Personalization
+  // settings page now has:
+  //   - Base style dropdown (Default / Efficient / etc.)
+  //   - Characteristics sliders (Warm, Enthusiastic, Headers & Lists, Emoji)
+  //   - Fast answers toggle
+  //   - SINGLE "Custom instructions" text field (1500 char limit per help article)
+  //   - Memory + Record mode toggles
+  //
+  // We now generate one block for the Custom instructions field.
+  // Slider recommendations are surfaced separately in the panel (see buildChatGPTPanel).
 
-  const box1 = [
+  const text = [
     "# About me",
     c.aboutMe,
     c.hobbies ? `My hobbies and interests: ${c.hobbies}.` : null,
     "",
     "# What I want help with",
     c.goalsLine,
-  ].filter(Boolean).join("\n");
-
-  const box2 = [
+    "",
     "# How to respond",
     `- Tone: ${c.tone}.`,
     `- Reading level: ${c.readingLevel}`,
@@ -571,9 +581,41 @@ function adaptForChatGPT(c) {
     "",
     "# When unsure",
     c.fallback,
-  ].join("\n");
+  ].filter(Boolean).join("\n");
 
-  return { box1, box2 };
+  return { text, sliders: deriveChatGPTSliders(c) };
+}
+
+// Map chatprep answers → ChatGPT's Characteristics slider recommendations.
+// These are the four sliders OpenAI added to the Personalization panel
+// in April 2026: Warm, Enthusiastic, Headers & Lists, Emoji.
+// Each is "Less ↔ Default ↔ More". Only emit a recommendation if we
+// have signal from the user's answers; otherwise leave the slider alone.
+function deriveChatGPTSliders(c) {
+  const out = [];
+
+  // Warm: based on tone. Warm if the user picked "warm and patient" (=new comfort).
+  if (/warm/i.test(c.tone))     out.push({ name: "Warm",            setting: "More" });
+  else if (/direct/i.test(c.tone)) out.push({ name: "Warm",         setting: "Less" });
+
+  // Enthusiastic: dial down if user said "no jokes or filler"
+  if (c.avoid.some(a => /joke|filler/i.test(a))) {
+    out.push({ name: "Enthusiastic", setting: "Less" });
+  }
+
+  // Headers & Lists: turn up if format calls for bullets / structured output
+  if (/bullet|structure|short paragraphs/i.test(c.format)) {
+    out.push({ name: "Headers & Lists", setting: "More" });
+  } else if (/prose|riff|match the tone/i.test(c.format)) {
+    out.push({ name: "Headers & Lists", setting: "Less" });
+  }
+
+  // Emoji: explicit no-emoji opt-in
+  if (c.avoid.some(a => /emoji/i.test(a))) {
+    out.push({ name: "Emoji", setting: "Less" });
+  }
+
+  return out;
 }
 
 function adaptForClaude(c) {
@@ -680,14 +722,46 @@ function fillPanel(name, nodes) {
   panel.replaceChildren(...nodes);
 }
 
-function buildChatGPTPanel({ box1, box2 }) {
+function buildChatGPTPanel({ text, sliders }) {
   const svc = services.chatgpt;
-  return [
+  const nodes = [
     makeHint(svc.where_to_paste_human, svc.settings_url),
-    makeOutputBlock("Box 1 — \"What would you like ChatGPT to know about you?\"", box1, svc.char_limit_per_box),
-    makeOutputBlock("Box 2 — \"How would you like ChatGPT to respond?\"", box2, svc.char_limit_per_box),
-    makeVerifiedStamp(),
+    makeOutputBlock(null, text, svc.char_limit_per_box),
   ];
+  if (sliders && sliders.length) {
+    nodes.push(makeSliderRecommendations(sliders));
+  }
+  nodes.push(makeVerifiedStamp());
+  return nodes;
+}
+
+function makeSliderRecommendations(sliders) {
+  const wrap = document.createElement("div");
+  wrap.className = "tab-panel__paste-hint";
+
+  const heading = document.createElement("strong");
+  heading.textContent = "Bonus — adjust these sliders too:";
+  wrap.appendChild(heading);
+
+  wrap.appendChild(document.createElement("br"));
+
+  const intro = document.createElement("span");
+  intro.textContent = "ChatGPT's Personalization page (just above the Custom instructions field) has a \"Characteristics\" section with sliders. Based on your answers, we'd suggest:";
+  wrap.appendChild(intro);
+
+  const list = document.createElement("ul");
+  list.style.margin = "0.6rem 0 0";
+  list.style.paddingLeft = "1.2rem";
+  sliders.forEach(s => {
+    const li = document.createElement("li");
+    const name = document.createElement("strong");
+    name.textContent = s.name;
+    li.appendChild(name);
+    li.appendChild(document.createTextNode(` → ${s.setting}`));
+    list.appendChild(li);
+  });
+  wrap.appendChild(list);
+  return wrap;
 }
 
 function buildSinglePanel(name, text, opts = {}) {

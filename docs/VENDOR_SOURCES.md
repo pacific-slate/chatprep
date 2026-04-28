@@ -91,12 +91,23 @@ This means:
 
 In addition to the developer docs above, the actual consumer UIs were verified live via claude-in-chrome on this date. Confirmed findings:
 
-### ChatGPT (help.openai.com/en/articles/8096356, updated 5 days before verification)
-- ✅ **1500 character limit** on long-form text fields (direct quote: *"The longer form text fields have a 1500 character limit"*).
-- ⚠️ Help article phrasing is **ambiguous** about whether the UI still presents two separate text boxes ("What would you like ChatGPT to know about you?" / "How would you like ChatGPT to respond?") or has consolidated to a single Custom Instructions field. We currently generate two boxes — re-verify by logging in to ChatGPT before any release that depends on this.
-- Path web: Settings → Personalization → Enable customization → Custom Instructions field
-- Path mobile: Settings → Customize ChatGPT → Custom Instructions field
-- "Custom instructions are available on all plans on Web, Desktop, iOS, and Android" — quoted from the help article.
+### ChatGPT (verified live in chatgpt.com 2026-04-27, logged-in account)
+- ✅ **1500 character limit** on the Custom Instructions field (per OpenAI help article quote: *"The longer form text fields have a 1500 character limit"*).
+- ✅ **The two-box pattern is GONE.** Confirmed by direct UI inspection. Personalization panel structure is now:
+  1. **Base style** dropdown (e.g. "Default", "Efficient")
+  2. **Characteristics** section — four sliders, each Less ↔ Default ↔ More:
+     - Warm
+     - Enthusiastic
+     - Headers & Lists
+     - Emoji
+  3. **Fast answers** toggle
+  4. **Custom instructions** — single textarea (1500 char limit)
+  5. **Memory** section: Reference saved memories, Reference browser memories, Reference chat history (all toggles)
+  6. **Record mode**: Reference record history toggle
+  7. **Advanced** (collapsed)
+- Path web: Settings → Personalization → Custom instructions field
+- Path mobile: Settings → Customize ChatGPT → Custom instructions field
+- ChatPrep adapter: generates one consolidated block (was two), plus derives slider setting recommendations from the user's tone/format/avoid answers.
 
 ### Claude Projects (verified live in claude.ai)
 - ✅ Path: claude.ai → "Projects" (left sidebar) → "+ New project"

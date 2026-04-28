@@ -6,12 +6,12 @@
     "name": "ChatGPT",
     "vendor": "OpenAI",
     "settings_url": "https://chatgpt.com/#settings/Personalization",
-    "where_to_paste_human": "On the web: open ChatGPT → Settings (sidebar) → Personalization → turn on \"Enable customization\" → paste into the Custom Instructions field. On phone: Settings → Customize ChatGPT.",
-    "two_box": true,
+    "where_to_paste_human": "On the web: open ChatGPT → Settings (sidebar) → Personalization → paste into the Custom Instructions field (one block). On phone: Settings → Customize ChatGPT. Above the Custom Instructions field, the new Characteristics sliders (Warm / Enthusiastic / Headers & Lists / Emoji) — we suggest settings for those below.",
+    "two_box": false,
     "char_limit_per_box": 1500,
     "supports_files": false,
     "free_tier": true,
-    "notes": "Custom instructions apply to all chats. OpenAI's help article (updated April 2026) confirms 1500 character limit on the longer-form text fields. The two-box pattern (\"What would you like ChatGPT to know about you?\" / \"How would you like ChatGPT to respond?\") is what we generate for, but the help article phrasing is ambiguous about whether the UI now consolidates these — verify before each release."
+    "notes": "Verified live 2026-04-27: ChatGPT's Personalization panel was redesigned. The two-box pattern is GONE — there is now one Custom Instructions textarea (1500 char limit), preceded by a Base style dropdown, four Characteristics sliders (Warm / Enthusiastic / Headers & Lists / Emoji), and a Fast answers toggle. Below: Memory + Record mode toggles. ChatPrep generates one consolidated block for the textarea, plus slider setting suggestions derived from the user's answers."
   },
 
   "claude": {
